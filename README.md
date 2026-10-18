@@ -19,8 +19,9 @@ Titanfall 2 VR is closed source and not included here. This repository holds onl
 
 ## Install
 
-1. Copy this repository's contents into the `TF2VR` profile folder of your Titanfall 2 install. That folder holds `plugins/Titanfall2VR.dll`.
-2. With the game closed, run `python kbm_patch\install.py`. It:
+1. Download or clone this repository anywhere. Find the `TF2VR` profile folder of your Titanfall 2 install. That folder holds `plugins/Titanfall2VR.dll`.
+2. With the game closed, run `python kbm_patch\install.py --profile=<path to TF2VR>`. You can set the `TF2VR_PROFILE` environment variable instead of passing `--profile`. It:
+   - copies `TF2VR.Minimal` into the profile's `mods` folder;
    - copies the VR settings menu files from your installed `Titanfall2VR.Cockpit` mod into `TF2VR.Minimal`;
    - disables `Titanfall2VR.Cockpit` and enables `TF2VR.Minimal` in `enabledmods.json`;
    - sets `tools/launch.json` to start the game borderless at your monitor's resolution;
@@ -29,7 +30,9 @@ Titanfall 2 VR is closed source and not included here. This repository holds onl
 
 Before patching, the patcher checks every site against the bytes it expects. If Titanfall 2 VR was updated, it stops without changing anything.
 
-To undo everything, run `python kbm_patch\install.py --undo`.
+To undo everything, run `python kbm_patch\install.py --undo`. This leaves `TF2VR.Minimal` in place, disabled.
+
+For development, add `--link`. The profile then gets a junction to this repository's `TF2VR.Minimal` instead of a copy, so script edits show up in the game without reinstalling.
 
 Optional patcher settings, passed through by the installer:
 
@@ -60,6 +63,10 @@ Every patch site is commented in the script.
 - When aiming down sights, the sights line up between the eyes instead of with one eye.
 - The arm-span calibration still runs at every start. Do it in the pose you play in, for example seated.
 - Jump occasionally misses a press.
+
+## Licence
+
+The code in this repository is MIT licensed; see `LICENSE`. That covers only this repository, not Titanfall 2 VR, Northstar or the game.
 
 ## Disclaimer
 
