@@ -242,7 +242,7 @@
                 </Border>
 
                 <Grid Grid.Row="1">
-                    <ScrollViewer x:Name="InstallView" VerticalScrollBarVisibility="Auto" Margin="0,0,-10,0">
+                    <ScrollViewer x:Name="InstallView" VerticalScrollBarVisibility="Auto" Margin="0,0,-10,0" ScrollChanged="InstallView_ScrollChanged">
                         <Grid Margin="0,0,10,0">
                             <StackPanel x:Name="BigWalkContent">
                                 <Border Style="{StaticResource CardStatic}" Padding="16,13">

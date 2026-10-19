@@ -56,6 +56,18 @@ namespace BigWalkVRInstaller
         bool HasGame => _bigWalk?.HasGame == true;
         bool TitanfallCanUpdate => _titanfall.IsInstalled && _titanfallRelease != null && _titanfall.CanUpdate(_titanfallRelease, _titanfallChannel?.id);
 
+        // CLTFVRMod-Mod: grow the window until the Titanfall page fits without scrolling, up to the screen's height,
+        // keeping it centred; it never shrinks, so collapsing the keyboard and mouse options leaves it as it is
+        void InstallView_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            var overflow = InstallView.ExtentHeight - InstallView.ViewportHeight;
+            if (overflow < 1) return;
+            var screen = SystemParameters.WorkArea;
+            var height = Math.Min(Height + Math.Ceiling(overflow), screen.Height);
+            Top = Math.Max(screen.Top, Math.Min(Top - (height - Height) / 2, screen.Bottom - height));
+            Height = height;
+        }
+
         async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _settings = AppSettings.Load();
