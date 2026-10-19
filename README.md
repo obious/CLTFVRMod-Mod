@@ -30,7 +30,7 @@ The patch set lives in [`kbm/`](kbm/), with the Python tools used to find and te
 
 ## Building
 
-`dotnet build CircuitLordVRModInstaller.sln -c Release` (Windows, .NET Framework 4.8 targeting) builds `CLTFVRModLauncher.exe`; `dotnet run --project tests/InstallerValidation -c Release` runs the checks. After changing a patch, re-export the patch set with `python kbm/kbm_patch/patch_tf2vr_kbm.py <untouched Titanfall2VR.dll> --export=kbm/kbm.json`.
+`dotnet build CircuitLordVRModInstaller.sln -c Release` (Windows, .NET Framework 4.8 targeting) builds `CLTFV_KBM.exe`; `dotnet run --project tests/InstallerValidation -c Release` runs the checks. After changing a patch, re-export the patch set with `python kbm/kbm_patch/patch_tf2vr_kbm.py <untouched Titanfall2VR.dll> --export=kbm/kbm.json`.
 
 ## Credits and licence
 
