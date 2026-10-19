@@ -8,6 +8,18 @@
   ],
   "ConVars": [
     {
+      "Name": "tf2vr_ads_eye",
+      "DefaultValue": "-1",
+      "Flags": "ARCHIVE_PLAYERPROFILE",
+      "HelpString": "eye the sights line up with when aiming down sights: -1 left, 1 right, 0 between the eyes"
+    },
+    {
+      "Name": "tf2vr_ads_drop",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE",
+      "HelpString": "metres to lower the gun when aiming down sights (negative raises it)"
+    },
+    {
       "Name": "tf2vr_snap_turn",
       "DefaultValue": "0",
       "Flags": "ARCHIVE_PLAYERPROFILE"

@@ -152,6 +152,39 @@ if '--vr-rig' not in sys.argv:
         ('pilot reticle: group-6 end capture goes through the helper', 0x27056,
          bytes.fromhex('e855c40900'), bytes.fromhex('e8b6d60000')),
     ]
+    # Dominant-eye ADS: the game places the viewmodel for its one camera at the head centre, so with both eyes
+    # rendering it the sights sit between them. The viewmodel group-view hook (0x88220) rebuilds the viewmodel's
+    # per-eye view from the eye pose only in "DISTANT" mode (0x2ca51f); otherwise it equals the world eye view.
+    # Always rebuild it, through a helper (dead body of 0x435a0, needs the VR-magazine patch above) that moves
+    # both viewmodel eye cameras by -0.5*tf2vr_ads_eye*(R-L) and up by tf2vr_ads_drop (metres), times the game's
+    # ADS fraction. ConVar pointers are cached at 0x31ec70/78; TF2VR.Minimal must define both convars.
+    PATCHES += [
+        ('ADS eye: always rebuild the viewmodel view from the eye pose (je -> nop)', 0x88267,
+         bytes.fromhex('0f848b000000'), b'\x90' * 6),
+        ('ADS eye: viewmodel eye-pose helper in dead code', 0x435b0,
+         bytes.fromhex(
+          '41544155415641574881ec90010000488b05ba9b14004833c44889842480010000488bf9488b05e5a02d00480540ef1400'
+          'b9ffffffffffd0488be88b9f341200004885c00f84f106000083fbff0f84e80600000fb7f381fe004000007235b9020000'
+          '00ff154f830e00488bc84c8d056d1e1000488d1516c10e00e8b1e1fbff488d0d5a1e1000ff15847b0e00b907000000cd29'
+          'c1e6058bc6488b0d71a02d0048038130f0b000483968080f858b060000c1eb10395810745f488d15c9241000488d0d6a56'
+          '2d00e85522fcff488bc8b20ae82b24fcff488d0d54562d00ff15367e0e00b902000000ff15cb820e00488bc84c8d059124'
+          '1000488d1592c00e00e82de1fbff488d0d7e241000ff15007b0e00b907000000cd29488b9d582a00004885db0f84140600'
+          '00448b33458bc6488d542430488d0d279e1400e852dafeff448bbf50120000448baf5412000080bc24d0000000000f84e1'
+          '050000448ba424c8000000443ba7c81500000f85cc0500008b4b04394c24340f94c3742a488d1566241000488d0da7552d'
+          '00e89221fcff488bc8b20ae86823fcff488d0d91552d00ff15737d0e0084db7535b9020000'),
+         bytes.fromhex(
+          '5356574881eca00000004889ce4889d74c898424900000004c89cb0f10030f114424400f1043100f114424500f1043200f'
+          '114424600f1043300f11442470488b057bb62d004885c07522488d4c2420488d153a010000e8551afcff488d4c2420e8db'
+          '9fffff48890554b62d00488b0555b62d004885c07522488d4c2420488d151a010000e8271afcff488d4c2420e8ad9fffff'
+          '4889052eb62d000f57c0f30f11842498000000488b0563a02d00480540ef1400b9ffffffffffd04885c00f84950000004889'
+          'c1488b0543a02d00480540842c00ffd0f30f118424980000000f57c90f2fc10f866e000000488b05cfb52d00f30f105058'
+          '488b05cbb52d00f30f105858f30f59d0f30f59156e000000f30f59d8488b05971e28000f10a0e80800000f10a8a8080000'
+          '0f5ce50fc6d2000f59e20f102d480000000f54e50f106c24600f58ec0f116c2460f30f10642464f30f58e3f30f11642464'
+          '4889f14889fa4c8b8424900000004c8d4c2440e850ef03004881c4a00000005f5e5bc3cc000000bfffffffffffffffffff'
+          'ffffff0000000074663276725f6164735f6579650074663276725f6164735f64726f7000')),
+        ('ADS eye: viewmodel eye view goes through the helper', 0x8829e,
+         bytes.fromhex('e8cda3ffff'), bytes.fromhex('e80db3fbff')),
+    ]
     # server weapon-frame hook (0x3d2d0): its manual-reload manager drives ammo from VR magazine
     # gestures, and it restores weapon+0x1eac after the game's frame to cancel vanilla reloads
     PATCHES += [

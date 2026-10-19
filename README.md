@@ -7,6 +7,7 @@ Titanfall 2 VR plays the campaign with motion controllers: guns in your hands, m
 - keyboard movement and your own key binds
 - the mouse turns you and aims, while the headset looks around freely on top of that
 - the game's crosshair, placed in the world where you aim rather than stuck to your view
+- aiming down sights lines the sights up with your dominant eye (Sight Eye and Sight Height in the VR settings menu)
 - the stock first-person gun, its animations, firing and reloading
 - a borderless full-screen desktop window that keeps the mouse inside
 - the VR settings menu in the pause menu
@@ -23,7 +24,7 @@ Titanfall 2 VR is closed source and not included here. This repository holds onl
 1. Download or clone this repository anywhere. Find the `TF2VR` profile folder of your Titanfall 2 install. That folder holds `plugins/Titanfall2VR.dll`.
 2. With the game closed, run `python kbm_patch\install.py --profile=<path to TF2VR>`. You can set the `TF2VR_PROFILE` environment variable instead of passing `--profile`. It:
    - copies `TF2VR.Minimal` into the profile's `mods` folder;
-   - copies the VR settings menu files from your installed `Titanfall2VR.Cockpit` mod into `TF2VR.Minimal`;
+   - copies the VR settings menu files from your installed `Titanfall2VR.Cockpit` mod into `TF2VR.Minimal`, turning the VR gun's angle and grip rows into Sight Eye and Sight Height;
    - disables `Titanfall2VR.Cockpit` and enables `TF2VR.Minimal` in `enabledmods.json`;
    - sets `tools/launch.json` to start the game borderless at your monitor's resolution;
    - patches `plugins/Titanfall2VR.dll`. The original is kept as `Titanfall2VR.dll.orig`.
@@ -52,6 +53,7 @@ Your key binds live in `%LOCALAPPDATA%\Respawn\Titanfall2_VR`, separate from the
 - turns the VR body with the mouse's yaw;
 - skips the hand/gun rig, shot-direction and manual-reload hooks;
 - shows the game's crosshair on foot, drawn with the plugin's Titan reticle at the point a trace along your aim hits;
+- moves the gun toward your dominant eye while aiming down sights (`tf2vr_ads_eye`, `tf2vr_ads_drop`);
 - sizes the desktop window.
 
 Every patch site is commented in the script.
@@ -62,7 +64,7 @@ Every patch site is commented in the script.
 
 - Moving the mouse up and down aims but doesn't tilt the headset view.
 - There's no mouse cursor in the headset in menus. Use the keyboard or the desktop window.
-- When aiming down sights, the sights line up between the eyes instead of with one eye.
+- Red-dot and holographic sight reticles don't show when aiming down sights.
 - The arm-span calibration still runs at every start. Do it in the pose you play in, for example seated.
 - Jump occasionally misses a press.
 - The grenade throw arc isn't shown.

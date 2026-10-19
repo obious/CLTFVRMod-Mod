@@ -14,7 +14,7 @@ Usage:  python kbm_patch\\install.py [--profile=PATH] [--link] [--undo] [patcher
   4. launches the game borderless at the monitor's size (tools/launch.json)
   5. patches plugins/Titanfall2VR.dll (see patch_tf2vr_kbm.py; extra options are passed through)
 """
-import json, os, shutil, subprocess, sys
+import json, os, re, shutil, subprocess, sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -45,6 +45,50 @@ COCKPIT_UI_FILES = [
     'resource/ui/menus/tf2vr_settings.menu',
     'resource/tf2vr_english.txt',
 ]
+
+
+# Without the VR gun, its two settings rows (angle offset, grip toggle) do nothing; reuse them for the sight eye
+# and sight height of dominant-eye ADS (convars defined in TF2VR.Minimal's mod.json). (file, pattern, new text)
+ADS_EYE_LIST = '''ConVar "tf2vr_ads_eye"
+\t\t\tlist
+\t\t\t{
+\t\t\t\t"#CLTFVR_EYE_LEFT" -1
+\t\t\t\t"#CLTFVR_EYE_CENTER" 0
+\t\t\t\t"#CLTFVR_EYE_RIGHT" 1
+\t\t\t}'''
+ADS_DROP_LIST = 'ConVar "tf2vr_ads_drop"\n\t\t\tlist\n\t\t\t{\n' + ''.join(
+    f'\t\t\t\t"{cm:+d} cm" {cm / 100:g}\n'.replace('+0 cm', '0 cm') for cm in range(-3, 9)) + '\t\t\t}'
+ADS_TOKENS = '''        "CLTFVR_ADS_EYE" "Sight Eye"
+        "CLTFVR_ADS_EYE_DESC" "The eye the sights line up with when aiming down sights. Pick your dominant eye."
+        "CLTFVR_ADS_DROP" "Sight Height"
+        "CLTFVR_ADS_DROP_DESC" "Lowers the gun while aiming down sights so the sights meet your eye. Negative values raise it."
+        "CLTFVR_EYE_LEFT" "Left"
+        "CLTFVR_EYE_CENTER" "Between the eyes"
+        "CLTFVR_EYE_RIGHT" "Right"
+'''
+MENU_EDITS = [
+    ('resource/ui/menus/tf2vr_settings.menu', r'ConVar "tf2vr_gun_angle_offset"\s*list\s*\{[^}]*\}', ADS_EYE_LIST),
+    ('resource/ui/menus/tf2vr_settings.menu', r'ConVar "tf2vr_toggle_grip"\s*list\s*\{[^}]*\}', ADS_DROP_LIST),
+    ('scripts/vscripts/tf2vr_settings.nut', r'"SwchGunAngleOffset", "#TF2VR_GUN_ANGLE_OFFSET"',
+     '"SwchGunAngleOffset", "#CLTFVR_ADS_EYE"'),
+    ('scripts/vscripts/tf2vr_settings.nut', r'"SwchToggleGrip", "#TF2VR_GUN_GRIP"', '"SwchToggleGrip", "#CLTFVR_ADS_DROP"'),
+    ('resource/tf2vr_english.txt', r'(?=\n    \}\s*\}\s*$)', '\n' + ADS_TOKENS.rstrip('\n')),
+]
+
+
+def edit_menu():
+    for f, pattern, new in MENU_EDITS:
+        path = MINIMAL / f
+        raw = path.read_bytes()
+        encoding = 'utf-16' if raw[:2] in (b'\xff\xfe', b'\xfe\xff') else 'utf-8'
+        text = raw.decode(encoding)
+        crlf = '\r\n' in text
+        text = text.replace('\r\n', '\n')
+        matches = len(re.findall(pattern, text))
+        if matches != 1:
+            sys.exit(f'ABORT: {f} changed in this Titanfall 2 VR version ({matches} matches for {pattern!r})')
+        text = re.sub(pattern, lambda _: new, text)
+        path.write_bytes((text.replace('\n', '\r\n') if crlf else text).encode(encoding))
 
 
 def set_enabled_mods(minimal):
@@ -100,6 +144,9 @@ def install():
         (MINIMAL / f).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(COCKPIT / f, MINIMAL / f)
     print(f'copied {len(COCKPIT_UI_FILES)} settings menu files from Titanfall2VR.Cockpit')
+    if '--vr-rig' not in sys.argv:
+        edit_menu()
+        print('settings menu: gun angle and grip rows now set the sight eye and sight height')
 
     set_enabled_mods(minimal=True)
     print('enabled TF2VR.Minimal, disabled Titanfall2VR.Cockpit')
