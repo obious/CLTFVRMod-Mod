@@ -1,0 +1,309 @@
+{
+ "dllSha256": "6b550331c17830999602f573c59307544bcb357838aad11ff00037cbe59523f3",
+ "modName": "TF2VR.Minimal",
+ "modVersion": "0.1.0",
+ "cockpitUiFiles": [
+  "scripts/vscripts/tf2vr_menu.nut",
+  "scripts/vscripts/tf2vr_settings.nut",
+  "resource/ui/menus/ingame_sp.menu",
+  "resource/ui/menus/tf2vr_settings.menu",
+  "resource/tf2vr_english.txt"
+ ],
+ "menuEdits": [
+  {
+   "file": "resource/ui/menus/tf2vr_settings.menu",
+   "pattern": "ConVar \"tf2vr_gun_angle_offset\"\\s*list\\s*\\{[^}]*\\}",
+   "replacement": "ConVar \"tf2vr_ads_eye\"\n\t\t\tlist\n\t\t\t{\n\t\t\t\t\"#CLTFVR_EYE_LEFT\" -1\n\t\t\t\t\"#CLTFVR_EYE_CENTER\" 0\n\t\t\t\t\"#CLTFVR_EYE_RIGHT\" 1\n\t\t\t}"
+  },
+  {
+   "file": "resource/ui/menus/tf2vr_settings.menu",
+   "pattern": "ConVar \"tf2vr_toggle_grip\"\\s*list\\s*\\{[^}]*\\}",
+   "replacement": "ConVar \"tf2vr_ads_drop\"\n\t\t\tlist\n\t\t\t{\n\t\t\t\t\"-3 cm\" -0.03\n\t\t\t\t\"-2 cm\" -0.02\n\t\t\t\t\"-1 cm\" -0.01\n\t\t\t\t\"0 cm\" 0\n\t\t\t\t\"+1 cm\" 0.01\n\t\t\t\t\"+2 cm\" 0.02\n\t\t\t\t\"+3 cm\" 0.03\n\t\t\t\t\"+4 cm\" 0.04\n\t\t\t\t\"+5 cm\" 0.05\n\t\t\t\t\"+6 cm\" 0.06\n\t\t\t\t\"+7 cm\" 0.07\n\t\t\t\t\"+8 cm\" 0.08\n\t\t\t}"
+  },
+  {
+   "file": "scripts/vscripts/tf2vr_settings.nut",
+   "pattern": "\"SwchGunAngleOffset\", \"#TF2VR_GUN_ANGLE_OFFSET\"",
+   "replacement": "\"SwchGunAngleOffset\", \"#CLTFVR_ADS_EYE\""
+  },
+  {
+   "file": "scripts/vscripts/tf2vr_settings.nut",
+   "pattern": "\"SwchToggleGrip\", \"#TF2VR_GUN_GRIP\"",
+   "replacement": "\"SwchToggleGrip\", \"#CLTFVR_ADS_DROP\""
+  },
+  {
+   "file": "resource/tf2vr_english.txt",
+   "pattern": "(?=\\n    \\}\\s*\\}\\s*$)",
+   "replacement": "\n        \"CLTFVR_ADS_EYE\" \"Sight Eye\"\n        \"CLTFVR_ADS_EYE_DESC\" \"The eye the sights line up with when aiming down sights. Pick your dominant eye.\"\n        \"CLTFVR_ADS_DROP\" \"Sight Height\"\n        \"CLTFVR_ADS_DROP_DESC\" \"Lowers the gun while aiming down sights so the sights meet your eye. Negative values raise it.\"\n        \"CLTFVR_EYE_LEFT\" \"Left\"\n        \"CLTFVR_EYE_CENTER\" \"Between the eyes\"\n        \"CLTFVR_EYE_RIGHT\" \"Right\""
+  }
+ ],
+ "window": {
+  "rva": 1496736,
+  "expected": "000000000000000000050000d0020000"
+ },
+ "patches": [
+  {
+   "name": "window hook: stop dropping mouse messages (ja -> jmp)",
+   "rva": 201736,
+   "expected": "7704",
+   "replacement": "eb04"
+  },
+  {
+   "name": "movement hook: keep keyboard forward/side move (je -> jmp)",
+   "rva": 206455,
+   "expected": "741a",
+   "replacement": "eb1a"
+  },
+  {
+   "name": "command hook: keep the reload button (je -> jmp)",
+   "rva": 202342,
+   "expected": "7439",
+   "replacement": "eb39"
+  },
+  {
+   "name": "window: do not add a resize frame (or rbx, 0x50000 -> 0)",
+   "rva": 129374,
+   "expected": "4881cb00000500",
+   "replacement": "4881cb00000000"
+  },
+  {
+   "name": "window: move to 0,0 (SetWindowPos flags 0x36 -> 0x34)",
+   "rva": 129660,
+   "expected": "c744243036000000",
+   "replacement": "c744243034000000"
+  },
+  {
+   "name": "cursor hook: always report the real cursor (je rel32 -> jmp rel32)",
+   "rva": 631982,
+   "expected": "0f8496000000",
+   "replacement": "e99700000090"
+  },
+  {
+   "name": "command hook: keep mouse view angles, turn the VR body with mouse yaw",
+   "rva": 202031,
+   "expected": "803d928c2900007442803dce8f29000075390f100d908c29000f28c1660f73d908f20f11430c660f7e4b14803d7f8f2900007517803dfa672e0000b8feefdeffb9ffffdfff0f45c1214340",
+   "replacement": "f30f1043100f28c8f30f5c0521d72e00f30f110d19d72e00803d16d72e0000c6050fd72e000174230f28c80f540d8fc513000f2f0d78bc13007710f30f5805968f2900f30f11058e8f2900"
+  },
+  {
+   "name": "vanilla viewmodel: skip client.buildRigSlot",
+   "rva": 103435,
+   "expected": "e860aa0800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla viewmodel: skip client.blendRigSlot",
+   "rva": 103475,
+   "expected": "e838aa0800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla viewmodel: skip client.setupRigSlot",
+   "rva": 103690,
+   "expected": "e861a90800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla viewmodel: skip client.setupRigSlot2",
+   "rva": 103730,
+   "expected": "e839a90800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla viewmodel: skip client.setupSeatedRigSlot",
+   "rva": 103770,
+   "expected": "e811a90800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla viewmodel: skip client.setupCinematicRigSlot",
+   "rva": 103810,
+   "expected": "e8e9a80800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla viewmodel: skip client.drawRigSlot",
+   "rva": 111050,
+   "expected": "e8a18c0800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla viewmodel: skip client.setupGrenadeSlot",
+   "rva": 111090,
+   "expected": "e8798c0800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla crosshair: keep the game's crosshair on foot (jne -> nop)",
+   "rva": 170926,
+   "expected": "0f8504feffff",
+   "replacement": "909090909090"
+  },
+  {
+   "name": "pilot reticle: run the reticle trace on foot",
+   "rva": 196640,
+   "expected": "0fb605b9a42900",
+   "replacement": "4885c90f95c090"
+  },
+  {
+   "name": "pilot reticle: trace from the game aim on foot, muzzle in a Titan",
+   "rva": 196703,
+   "expected": "0fb6050aa22900488d0d07a22900488d150ca2290084c07420",
+   "replacement": "488d0d0ea229000fb641fc220570a42900488d510c74229090"
+  },
+  {
+   "name": "pilot reticle: capture the crosshair group on foot (je -> nop)",
+   "rva": 145839,
+   "expected": "7417",
+   "replacement": "9090"
+  },
+  {
+   "name": "pilot reticle: place the reticle on foot (je -> nop)",
+   "rva": 146440,
+   "expected": "0f84fd000000",
+   "replacement": "909090909090"
+  },
+  {
+   "name": "pilot reticle: capture helpers in dead code",
+   "rva": 214752,
+   "expected": "00488b4424284981c0ad525b0048897424304c897424384c8bf24c897c24404c8bf9be10000000493bc0752e448b057987290065488b0425580000004a8b3cc0803c37007505e8c5d00d00b8400100008bd8803c38007407eb64bb40010000488d1542091100488d0d93452e00e87e11fdff488bc8b20ae85413fdff488d0d7d452e00ff155f6d0f00b902000000ff15f4710f00488bc84c8d050a091100488d15bbaf0f00e856d0fcff488d0df7081100ff15296a0f00b907000000cd29488b051b8f2e00498bd64805c0746200498bcfffd08b0dd386290065488b0425580000004c8b7c2440488b3cc8803c37007505e81ad00d00ba00030000488d0dda",
+   "replacement": "80b98c0600000074588a8190060000fec0880571a52e00515241504883ec20488b4908488b01488d1573a52e004c8d0574a52e004c8d0d7da52e00ff90d8020000488b4c24308b542428e881ed0800488b4c2430e87b0000004883c42041585a59e9eae8080051524883ec28e85fed08004883c4285a59440fb60509a52e004585c0744fc605fda42e000041ffc8515241504883ec20e839000000488b4c24308b542428448b442420e8a2e80800488b0deba42e004885c97411488b01ff501048c705d5a42e00000000004883c42041585a59c34883ec28488b4908488b01488b15baa42e004c8d05bba42e00448b0dc4a42e00ff90180100004883c428c3"
+  },
+  {
+   "name": "pilot reticle: group-6 begin capture goes through the helper",
+   "rva": 159798,
+   "expected": "e8f5bf0900",
+   "replacement": "e8a5d60000"
+  },
+  {
+   "name": "pilot reticle: group-6 end capture goes through the helper",
+   "rva": 159830,
+   "expected": "e855c40900",
+   "replacement": "e8ebd60000"
+  },
+  {
+   "name": "ADS eye: always rebuild the viewmodel view from the eye pose (je -> nop)",
+   "rva": 557671,
+   "expected": "0f848b000000",
+   "replacement": "909090909090"
+  },
+  {
+   "name": "ADS eye: viewmodel eye-pose helper in dead code",
+   "rva": 275888,
+   "expected": "41544155415641574881ec90010000488b05ba9b14004833c44889842480010000488bf9488b05e5a02d00480540ef1400b9ffffffffffd0488be88b9f341200004885c00f84f106000083fbff0f84e80600000fb7f381fe004000007235b902000000ff154f830e00488bc84c8d056d1e1000488d1516c10e00e8b1e1fbff488d0d5a1e1000ff15847b0e00b907000000cd29c1e6058bc6488b0d71a02d0048038130f0b000483968080f858b060000c1eb10395810745f488d15c9241000488d0d6a562d00e85522fcff488bc8b20ae82b24fcff488d0d54562d00ff15367e0e00b902000000ff15cb820e00488bc84c8d0591241000488d1592c00e00e82de1fbff488d0d7e241000ff15007b0e00b907000000cd29488b9d582a00004885db0f8414060000448b33458bc6488d542430488d0d279e1400e852dafeff448bbf50120000448baf5412000080bc24d0000000000f84e1050000448ba424c8000000443ba7c81500000f85cc0500008b4b04394c24340f94c3742a488d1566241000488d0da7552d00e89221fcff488bc8b20ae86823fcff488d0d91552d00ff15737d0e0084db7535b9020000",
+   "replacement": "5356574881eca00000004889ce4889d74c898424900000004c89cb0f10030f114424400f1043100f114424500f1043200f114424600f1043300f11442470488b057bb62d004885c07522488d4c2420488d153a010000e8551afcff488d4c2420e8db9fffff48890554b62d00488b0555b62d004885c07522488d4c2420488d151a010000e8271afcff488d4c2420e8ad9fffff4889052eb62d000f57c0f30f11842498000000488b0563a02d00480540ef1400b9ffffffffffd04885c00f84950000004889c1488b0543a02d00480540842c00ffd0f30f118424980000000f57c90f2fc10f866e000000488b05cfb52d00f30f105058488b05cbb52d00f30f105858f30f59d0f30f59156e000000f30f59d8488b05971e28000f10a0e80800000f10a8a80800000f5ce50fc6d2000f59e20f102d480000000f54e50f106c24600f58ec0f116c2460f30f10642464f30f58e3f30f116424644889f14889fa4c8b8424900000004c8d4c2440e850ef03004881c4a00000005f5e5bc3cc000000bfffffffffffffffffffffffff0000000074663276725f6164735f6579650074663276725f6164735f64726f7000"
+  },
+  {
+   "name": "ADS eye: viewmodel eye view goes through the helper",
+   "rva": 557726,
+   "expected": "e8cda3ffff",
+   "replacement": "e80db3fbff"
+  },
+  {
+   "name": "optic reticle: keep the game's weapon/sight RUIs on foot (je -> nop)",
+   "rva": 168348,
+   "expected": "0f843c0c0000",
+   "replacement": "909090909090"
+  },
+  {
+   "name": "optic reticle: weapon-RUI view helper in dead code",
+   "rva": 276320,
+   "expected": "04820e00488bc84c8d052a241000488d15cbbf0e00e866e0fbff488d0d17241000ff15397a0e",
+   "replacement": "488b05599f2d00480500bd2a024839c1750f514883ec20e8a44a04004883c42059e92a4a0400"
+  },
+  {
+   "name": "optic reticle: weapon-RUI view goes through the helper",
+   "rva": 195999,
+   "expected": "e80c840500",
+   "replacement": "e8bc390100"
+  },
+  {
+   "name": "barf mode / skip calibration: helpers in dead code",
+   "rva": 276368,
+   "expected": "447a0e003b05f64628000f94c3742a488d15ca231000488d0d33552d00e81e21fcff488bc8b20ae8f422fcff488d0d1d552d00ff15ff7c0e0084db7535b902000000ff1590810e00488bc84c8d058e231000488d1557bf0e00e8f2dffbff488d0d7b231000ff15c5790e00b907000000cd29c6879c210000000fb6b424d20000004084f6741a488b05a39e2d004805e0845b004533c94533c033d2488bcfffd08b9c24cc000000f6c3100f84800000004585ff7f5f488d1594231000488d0d8d542d00e87820fcff488bc8b20ae84e22fcff488d0d77542d00ff15597c0e00b902000000ff15ee800e00488bc84c8d055c231000488d15b5be0e00e850dffbff488d0d49231000ff1523790e00b907000000cd29418d57ff488b05119e2d004805e0845b004533c94533c0488bcfffd0b9ffffff7ff6c3020f84e90000004084f60f85e00000008bc3c1e802a8010f84c1000000c7842470010000010000008b8754120000898424740100008b977c18000085d20f48d1",
+   "replacement": "53564883ec58e855d4feff4889c3488b05fbb42d004885c07522488d4c2420488d1532010000e8a518fcff488d4c2420e82b9effff488905d4b42d00f30f1040580f57c90f2ec10f84a60000000f8aa0000000f30f11442440488b05d09e2d00480540ef1400b9ffffffffffd04885c00f847d0000004889c1488d542444488b05ab9e2d004805c0532c00ffd0f30f10442444f30f59442440f30f5905db961200f30f11442440e828f00c00f30f11442450f30f10442440e8f3ef0c00f30f104c24500f1053100f105b200fc6c0000fc6c9000f28e20f59e00f28eb0f59e90f5ce50f59d10f59d80f58d30f1163100f1153204889d84883c4585e5bc34584c90f8589ef03005152415041514883ec40488b0501b42d004885c07522488d4c2420488d1540000000e8a317fcff488d4c2420e8299dffff488905dab32d008b405c4883c440415941585a5985c00f853cef0300e949ef030074663276725f626172665f6d6f64650074663276725f736b69705f63616c00"
+  },
+  {
+   "name": "barf mode: body matrix call goes through the pitch helper",
+   "rva": 594833,
+   "expected": "e85af8f9ff",
+   "replacement": "e8fa23fbff"
+  },
+  {
+   "name": "skip calibration: startup state machine checks tf2vr_skip_cal",
+   "rva": 534554,
+   "expected": "4584c97412",
+   "replacement": "e96e10fcff"
+  },
+  {
+   "name": "vanilla firing: skip client.clientShotCall",
+   "rva": 103978,
+   "expected": "e801b70800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla firing: skip server.serverFirePoseCall",
+   "rva": 107455,
+   "expected": "e86ca90800",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla firing: client.clientShotDirectionCall passes straight to the game",
+   "rva": 214736,
+   "expected": "48895c2420574883ec204c8b05df8f",
+   "replacement": "488b05e98f2e004805c0746200ffe0"
+  },
+  {
+   "name": "vanilla reload: skip the VR manual-reload manager",
+   "rva": 250733,
+   "expected": "e8ae690000",
+   "replacement": "9090909090"
+  },
+  {
+   "name": "vanilla reload: keep reloads the game starts (je -> jmp)",
+   "rva": 251338,
+   "expected": "7407",
+   "replacement": "eb07"
+  },
+  {
+   "name": "vanilla reload: client VR magazine logic returns at once",
+   "rva": 275872,
+   "expected": "48895c",
+   "replacement": "31c0c3"
+  },
+  {
+   "name": "vanilla reload: server VR magazine logic returns at once",
+   "rva": 279408,
+   "expected": "48895c",
+   "replacement": "31c0c3"
+  },
+  {
+   "name": "vanilla reload: keep reloads the client predicts (je -> jmp)",
+   "rva": 250493,
+   "expected": "7407",
+   "replacement": "eb07"
+  },
+  {
+   "name": "patch table: skip client.disableMouse",
+   "rva": 109542,
+   "expected": "f8781200",
+   "replacement": "f6781200"
+  },
+  {
+   "name": "patch table: skip inputSystem.disableCursorWarp",
+   "rva": 109352,
+   "expected": "217d1200",
+   "replacement": "1c7d1200"
+  },
+  {
+   "name": "patch table: skip inputSystem.disableCursorCapture",
+   "rva": 109402,
+   "expected": "c77c1200",
+   "replacement": "c27c1200"
+  },
+  {
+   "name": "patch table: skip inputSystem.disableCursorShape",
+   "rva": 109452,
+   "expected": "747c1200",
+   "replacement": "707c1200"
+  }
+ ]
+}

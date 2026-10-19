@@ -33,10 +33,12 @@ def find_profile():
     return path.resolve()
 
 
-PROFILE = find_profile()
-COCKPIT = PROFILE / 'mods' / 'Titanfall2VR.Cockpit' / 'mod'
-MINIMAL = PROFILE / 'mods' / 'TF2VR.Minimal' / 'mod'
-DLL = PROFILE / 'plugins' / 'Titanfall2VR.dll'
+def set_profile(path):
+    global PROFILE, COCKPIT, MINIMAL, DLL
+    PROFILE = path
+    COCKPIT = PROFILE / 'mods' / 'Titanfall2VR.Cockpit' / 'mod'
+    MINIMAL = PROFILE / 'mods' / 'TF2VR.Minimal' / 'mod'
+    DLL = PROFILE / 'plugins' / 'Titanfall2VR.dll'
 
 COCKPIT_UI_FILES = [
     'scripts/vscripts/tf2vr_menu.nut',
@@ -172,4 +174,5 @@ def uninstall():
 
 if __name__ == '__main__':
     sys.stdout.reconfigure(line_buffering=True)  # keep our lines in order with the patcher's output
+    set_profile(find_profile())
     uninstall() if '--undo' in sys.argv else install()

@@ -1,4 +1,6 @@
-# CLTFVRMod-Mod
+# CLTFVRMod-Mod: patch set and developer tools
+
+Players use the launcher at the repository root, which applies all of this at launch. This folder holds the patch set it embeds (`kbm.json`), our `TF2VR.Minimal` script mod, and the Python tools used to find, test and export the patches.
 
 Keyboard and mouse play for Titanfall 2 VR by CircuitLord.
 
@@ -19,7 +21,7 @@ Titanfall 2 VR is closed source and not included here. This repository holds onl
 - Titanfall 2 with Titanfall 2 VR installed. The patch offsets fit the Titanfall2VR.dll build of Oct 9 2026 (sha256 `6b550331c178…`).
 - Python 3 on Windows.
 
-## Install
+## Install without the launcher (development)
 
 1. Download or clone this repository anywhere. Find the `TF2VR` profile folder of your Titanfall 2 install. That folder holds `plugins/Titanfall2VR.dll`.
 2. With the game closed, run `python kbm_patch\install.py --profile=<path to TF2VR>`. You can set the `TF2VR_PROFILE` environment variable instead of passing `--profile`. It:
@@ -34,7 +36,7 @@ Before patching, the patcher checks every site against the bytes it expects. If 
 
 To undo everything, run `python kbm_patch\install.py --undo`. This leaves `TF2VR.Minimal` in place, disabled.
 
-For development, add `--link`. The profile then gets a junction to this repository's `TF2VR.Minimal` instead of a copy, so script edits show up in the game without reinstalling.
+For development, add `--link`. The profile then gets a junction to this repository's `TF2VR.Minimal` instead of a copy, so script edits show up in the game without reinstalling. After changing a patch, export the set the launcher embeds with `python kbm_patch\patch_tf2vr_kbm.py <untouched Titanfall2VR.dll> --export=kbm.json`.
 
 Optional patcher settings, passed through by the installer:
 

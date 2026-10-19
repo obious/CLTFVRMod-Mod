@@ -20,6 +20,18 @@
       "HelpString": "metres to lower the gun when aiming down sights (negative raises it)"
     },
     {
+      "Name": "tf2vr_barf_mode",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE",
+      "HelpString": "mouse up/down tilts the VR view like a flat screen: 0 off, 1 full (fractions scale it)"
+    },
+    {
+      "Name": "tf2vr_skip_cal",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE",
+      "HelpString": "1 skips the arm-span/height calibration at startup; recenter once seated instead"
+    },
+    {
       "Name": "tf2vr_snap_turn",
       "DefaultValue": "0",
       "Flags": "ARCHIVE_PLAYERPROFILE"
@@ -238,6 +250,18 @@
     {
       "Path": "tf2vr_minimal_memories.nut",
       "RunOn": "CLIENT && SP"
+    },
+    {
+      "Path": "tf2vr_minimal_recenter.nut",
+      "RunOn": "UI"
+    }
+  ],
+  "ConCommands": [
+    {
+      "Name": "tf2vr_recenter",
+      "Function": "TF2VR_RecenterCommand",
+      "Context": "UI",
+      "HelpString": "recenter the VR view (bind it to a key: bind F9 tf2vr_recenter)"
     }
   ]
 }
