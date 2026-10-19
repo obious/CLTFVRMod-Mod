@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using BigWalkVRInstaller.Services;
@@ -287,17 +288,35 @@ namespace BigWalkVRInstaller.Installers
             return info;
         }
 
-        public static ProcessStartInfo CreateLaunchInfo(string gamePath)
+        public static ProcessStartInfo CreateLaunchInfo(string gamePath, bool kbm = false, int width = 1280, int height = 720,
+            bool barfMode = false, bool skipCalibration = false)
         {
             var settings = JsonUtil.Deserialize<TitanfallLaunchSettings>(File.ReadAllText(Path.Combine(gamePath, ProfileName, "tools", "launch.json")));
             var info = VrProcess(gamePath, Path.Combine(gamePath, ProfileName, "tools", "crash_monitor.exe"));
+            var arguments = settings.arguments.Concat(settings.vrArguments);
+            // keyboard and mouse: a borderless window covering the monitor, which the patched plugin keeps at 0,0
+            if (kbm) arguments = TitanfallKbm.LaunchArguments(arguments, width, height, barfMode, skipCalibration);
             // the mod replaces these dimensions before the engine initializes
             info.Arguments = "\"" + Path.Combine(gamePath, ProfileName) + "\" \"" + Path.Combine(gamePath, LauncherName) + "\" "
-                + string.Join(" ", settings.arguments.Concat(settings.vrArguments)
+                + string.Join(" ", arguments
                 .Select(arg => arg.Replace("{profile}", ProfileName).Replace("{width}", "1280")
                     .Replace("{height}", "720").Replace("{sound}", "1")));
             return info;
         }
+
+        [DllImport("user32.dll")] static extern IntPtr GetDC(IntPtr hwnd);
+        [DllImport("user32.dll")] static extern int ReleaseDC(IntPtr hwnd, IntPtr hdc);
+        [DllImport("gdi32.dll")] static extern int GetDeviceCaps(IntPtr hdc, int index);
+
+        // the primary monitor in physical pixels, whatever the display scaling
+        static (int width, int height) ScreenSize()
+        {
+            var hdc = GetDC(IntPtr.Zero);
+            try { return (GetDeviceCaps(hdc, 118), GetDeviceCaps(hdc, 117)); } // DESKTOPHORZRES, DESKTOPVERTRES
+            finally { ReleaseDC(IntPtr.Zero, hdc); }
+        }
+
+        public KbmSupport KbmSupport => HasGame ? TitanfallKbm.Check(GamePath) : KbmSupport.NotInstalled;
 
         // mods drop these beside the game to replace DirectX, which takes Present away from VR rendering
         static readonly string[] DirectXReplacements = { "dxgi.dll", "d3d11.dll" };
@@ -321,7 +340,14 @@ namespace BigWalkVRInstaller.Installers
                         .Where(File.Exists).ToArray();
                     if (replacements.Length > 0)
                         throw new Exception("Another mod replaced DirectX files, which breaks VR rendering. Remove these files and launch again:\n" + string.Join("\n", replacements));
-                    using (var monitor = Process.Start(CreateLaunchInfo(GamePath)))
+                    var kbm = _settings.Titanfall2KbmEnabled;
+                    var (width, height) = ScreenSize();
+                    if (kbm) TitanfallKbm.Enable(GamePath, width, height);
+                    else TitanfallKbm.Disable(GamePath);
+                    var barf = _settings.Titanfall2BarfMode;
+                    var skipCalibration = _settings.Titanfall2SkipCalibrationEnabled;
+                    log.WriteLine("kbm=" + kbm + (kbm ? $" size={width}x{height} barf={barf} skip_calibration={skipCalibration}" : ""));
+                    using (var monitor = Process.Start(CreateLaunchInfo(GamePath, kbm, width, height, barf, skipCalibration)))
                         log.WriteLine("monitor_started pid=" + monitor.Id);
                 }
                 catch (Exception error)

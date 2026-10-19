@@ -87,7 +87,7 @@ namespace InstallerValidation
                 File.WriteAllText(Path.Combine(defaultProfile, "savegames", "savegame.sav"), "default-checkpoint");
                 File.WriteAllText(Path.Combine(defaultProfile, "profile.cfg"), "campaign-unlocks");
 
-                var installer = new Titanfall2Installer(new AppSettings { Titanfall2Path = root });
+                var installer = new Titanfall2Installer(new AppSettings { Titanfall2Path = root, Titanfall2Kbm = false });
                 var user = System.Security.Principal.WindowsIdentity.GetCurrent().User.Value;
                 Icacls(root, $"/inheritance:r /grant:r *{user}:(OI)(CI)RX *S-1-5-18:(OI)(CI)F");
                 Assert(!installer.CanWriteGameFolder(), "protected game folder was reported writable");
@@ -150,6 +150,9 @@ namespace InstallerValidation
                 Assert(launch.FileName == Path.Combine(root, "TF2VR", "tools", "crash_monitor.exe"), "launch bypassed crash capture");
                 Assert(launch.Arguments == "\"" + profile + "\" \"" + Path.Combine(root, "Titanfall2VRLauncher.exe")
                     + "\" -profile=TF2VR -windowed -w 1280 -h 720 +sound_without_focus 1 +mat_vsync_mode 0", "wrong monitored launch arguments");
+                var kbmLaunch = Titanfall2Installer.CreateLaunchInfo(root, kbm: true, width: 3840, height: 2160, barfMode: true, skipCalibration: false);
+                Assert(kbmLaunch.Arguments.EndsWith(" -profile=TF2VR -windowed -noborder -w 3840 -h 2160 +sound_without_focus 1 +mat_vsync_mode 0"
+                    + " +tf2vr_barf_mode 1 +tf2vr_skip_cal 0"), "wrong keyboard and mouse launch arguments: " + kbmLaunch.Arguments);
                 Assert(launch.EnvironmentVariables["TF2VR_OPENXR"] == "1", "OpenXR was not enabled");
                 Assert(!launch.EnvironmentVariables.ContainsKey("TF2VR_DEV_SESSION"), "development session inherited");
                 Assert(!launch.EnvironmentVariables.ContainsKey("XR_RUNTIME_JSON"), "runtime override inherited");
@@ -427,8 +430,14 @@ namespace InstallerValidation
             var window = new MainWindow();
             var flags = BindingFlags.Instance | BindingFlags.NonPublic;
             var release = new ManifestMod { version = "9.0.0" };
-            typeof(MainWindow).GetField("_settings", flags).SetValue(window, new AppSettings { Titanfall2Path = root });
+            // the test package's plugin isn't the build the keyboard and mouse patch supports, which would block launching
+            var settings = new AppSettings { Titanfall2Path = root, Titanfall2Kbm = true };
+            typeof(MainWindow).GetField("_settings", flags).SetValue(window, settings);
             typeof(MainWindow).GetField("_titanfall", flags).SetValue(window, installer);
+            typeof(MainWindow).GetMethod("RefreshTitanfallState", flags).Invoke(window, null);
+            Assert(installer.KbmSupport == KbmSupport.UnsupportedBuild && !((Button)window.FindName("LaunchButton")).IsEnabled,
+                "unsupported plugin build could launch with keyboard and mouse");
+            settings.Titanfall2Kbm = false;
             typeof(MainWindow).GetField("_titanfallAvailable", flags).SetValue(window, release);
             typeof(MainWindow).GetField("_titanfallRelease", flags).SetValue(window, release);
             foreach (var channel in new[] { null, new ModChannel { id = "beta", version = "9.0.0" } })

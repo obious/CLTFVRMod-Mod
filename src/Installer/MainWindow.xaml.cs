@@ -24,7 +24,7 @@ namespace BigWalkVRInstaller
     {
         enum SelectedGame { None, BigWalk, Titanfall2 }
 
-        const string RepoUrl = "https://github.com/CircuitLord/CircuitLordVRModInstaller";
+        const string RepoUrl = "https://github.com/obious/CLTFVRMod-Mod";
         const string DiscordUrl = "https://discord.gg/MTKwud2cCP";
         const string SupportUrl = "https://ko-fi.com/circuitlord";
 
@@ -56,7 +56,7 @@ namespace BigWalkVRInstaller
         bool HasGame => _bigWalk?.HasGame == true;
         bool TitanfallCanUpdate => _titanfall.IsInstalled && _titanfallRelease != null && _titanfall.CanUpdate(_titanfallRelease, _titanfallChannel?.id);
 
-        void Window_Loaded(object sender, RoutedEventArgs e)
+        async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _settings = AppSettings.Load();
             _bigWalk = new BigWalkInstaller(_settings);
@@ -67,7 +67,8 @@ namespace BigWalkVRInstaller
             if (!HasGame) _bigWalk.DetectGamePath();
             if (!_titanfall.HasGame) _titanfall.DetectGamePath();
             UpdateGameCards();
-            Status("Choose a game to continue");
+            // CLTFVRMod-Mod is Titanfall 2 only
+            await OpenGame(SelectedGame.Titanfall2);
         }
 
         void UpdateGameCards()
@@ -179,7 +180,7 @@ namespace BigWalkVRInstaller
                 _titanfallAvailable = manifest.titanfall2vr;
                 _titanfallChannel = _titanfallAvailable?.FindChannel(_settings.Titanfall2Channel);
                 _titanfallRelease = _titanfallAvailable?.SelectRelease(_titanfallChannel);
-                if (SelfUpdater.IsUpdateAvailable(manifest.installer)) _selfUpdate = manifest.installer;
+                // the manifest's installer is CircuitLord's build, which would replace this fork
             }
             catch (Exception ex)
             {
@@ -284,7 +285,44 @@ namespace BigWalkVRInstaller
             TitanfallCrashReportButton.IsEnabled = hasGame;
             TitanfallSavesButton.IsEnabled = !_titanfallBusy;
             LaunchButton.ToolTip = installed ? "Launch Titanfall 2 VR" : "Install Titanfall 2 VR first";
+            RefreshKbmState(installed);
             SelectedGameStatus.Text = installed ? update ? "Update available" : "Ready to play" : hasGame ? "Setup required" : "Game not found";
+        }
+
+        void RefreshKbmState(bool installed)
+        {
+            var support = _titanfall.KbmSupport;
+            var on = _settings.Titanfall2KbmEnabled;
+            KbmToggle.IsChecked = on;
+            KbmToggle.IsEnabled = installed && !_titanfallBusy;
+            BarfModeToggle.IsChecked = _settings.Titanfall2BarfMode;
+            SkipCalibrationToggle.IsChecked = _settings.Titanfall2SkipCalibrationEnabled;
+            KbmOptions.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+            KbmOptions.IsEnabled = installed && !_titanfallBusy;
+            KbmText.Text = !installed
+                ? "Mouse aims, WASD moves and the headset looks around. Install Titanfall 2 VR first."
+                : support == KbmSupport.UnsupportedBuild
+                    ? "This Titanfall 2 VR version isn't supported by the keyboard and mouse patch yet. Turn it off to play with motion controllers."
+                    : on
+                        ? "On: mouse aims, WASD moves, the headset looks around. Turn off for motion controllers."
+                        : "Off: plays Titanfall 2 VR with motion controllers.";
+            KbmText.Foreground = Brush(installed && on && support == KbmSupport.UnsupportedBuild ? "Amber" : "TextDim");
+            SetStep(KbmBadge, KbmBadgeText, installed && on && support == KbmSupport.Supported);
+            if (installed && on && support == KbmSupport.UnsupportedBuild) LaunchButton.IsEnabled = false;
+        }
+
+        void KbmToggle_Click(object sender, RoutedEventArgs e)
+        {
+            _settings.Titanfall2Kbm = KbmToggle.IsChecked == true;
+            _settings.Save();
+            RefreshTitanfallState();
+        }
+
+        void KbmOption_Click(object sender, RoutedEventArgs e)
+        {
+            _settings.Titanfall2BarfMode = BarfModeToggle.IsChecked == true;
+            _settings.Titanfall2SkipCalibration = SkipCalibrationToggle.IsChecked == true;
+            _settings.Save();
         }
 
         void SetStep(Border badge, TextBlock label, bool done)

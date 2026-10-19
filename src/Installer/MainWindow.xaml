@@ -1,4 +1,4 @@
-<Window x:Class="BigWalkVRInstaller.MainWindow"
+﻿<Window x:Class="BigWalkVRInstaller.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:BigWalkVRInstaller"
@@ -90,7 +90,7 @@
         <Grid Grid.Row="0">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
                 <Image Source="app.ico" Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,10,0" />
-                <TextBlock Text="CircuitLord's VR Mod Installer" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock Text="CLTFVRMod-Mod Launcher" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
                 <TextBlock x:Name="VersionText" FontSize="11" Foreground="{StaticResource TextDim}"
                            VerticalAlignment="Center" Margin="10,1,0,0" />
             </StackPanel>
@@ -209,7 +209,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Button x:Name="BackButton" Style="{StaticResource Ghost}" Content="‹  Games" Padding="12,7" Click="BackToGames_Click" />
+                <Button x:Name="BackButton" Style="{StaticResource Ghost}" Content="‹  Games" Padding="12,7" Click="BackToGames_Click" Visibility="Collapsed" />
                 <Border Grid.Column="1" Width="30" Height="30" CornerRadius="6" ClipToBounds="True" Margin="12,0,9,0">
                     <Image x:Name="SelectedGameImage" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
                 </Border>
@@ -398,6 +398,58 @@
                                             <ProgressBar x:Name="TitanfallProgress" Style="{StaticResource Progress}" />
                                         </StackPanel>
                                     </StackPanel>
+                                </Border>
+
+                                <!-- CLTFVRMod-Mod: keyboard and mouse play, applied at each launch -->
+                                <Border Style="{StaticResource CardStatic}" Padding="16,13">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border x:Name="KbmBadge" Grid.Column="0" Style="{StaticResource StepBadge}">
+                                            <TextBlock x:Name="KbmBadgeText" Text="4" Tag="4" Style="{StaticResource StepBadgeText}" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,14,0">
+                                            <TextBlock Text="Keyboard and mouse" FontSize="13.5" FontWeight="SemiBold" />
+                                            <TextBlock x:Name="KbmText" FontSize="11.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                                        </StackPanel>
+                                        <CheckBox x:Name="KbmToggle" Grid.Column="2" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                                  AutomationProperties.Name="Play with keyboard and mouse" Click="KbmToggle_Click" />
+                                        <StackPanel x:Name="KbmOptions" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,12,0,0">
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
+                                                    <TextBlock Text="Mouse tilts the view" FontSize="12.5" FontWeight="SemiBold" />
+                                                    <TextBlock Text="Mouse up and down also tilts the headset view, like a flat screen. Intense for some players."
+                                                               FontSize="11.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                                </StackPanel>
+                                                <CheckBox x:Name="BarfModeToggle" Grid.Column="1" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                                          AutomationProperties.Name="Mouse tilts the view" Click="KbmOption_Click" />
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
+                                                    <TextBlock Text="Skip calibration" FontSize="12.5" FontWeight="SemiBold" />
+                                                    <TextBlock Text="No arm-span and height setup at startup. Press your recenter key once seated (console: bind F9 tf2vr_recenter)."
+                                                               FontSize="11.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                                </StackPanel>
+                                                <CheckBox x:Name="SkipCalibrationToggle" Grid.Column="1" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                                          AutomationProperties.Name="Skip calibration" Click="KbmOption_Click" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
                                 </Border>
 
                                 <StackPanel HorizontalAlignment="Center" Margin="0,28,0,10">

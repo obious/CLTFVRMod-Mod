@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace BigWalkVRInstaller.Services
@@ -13,6 +13,14 @@ namespace BigWalkVRInstaller.Services
         public string BigWalkChannel;
         public string Titanfall2Channel;
         public bool Titanfall2EaSignedIn;
+        // keyboard and mouse play (CLTFVRMod-Mod), on unless turned off; the serializer skips initializers
+        public bool? Titanfall2Kbm;
+        public bool Titanfall2KbmEnabled => Titanfall2Kbm ?? true;
+        // mouse up/down tilts the VR view (tf2vr_barf_mode), off unless turned on
+        public bool Titanfall2BarfMode;
+        // skip the arm-span/height calibration at startup (tf2vr_skip_cal), on unless turned off
+        public bool? Titanfall2SkipCalibration;
+        public bool Titanfall2SkipCalibrationEnabled => Titanfall2SkipCalibration ?? true;
 
         static string Dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BigWalkVRInstaller");
         static string FilePath => Path.Combine(Dir, "settings.json");

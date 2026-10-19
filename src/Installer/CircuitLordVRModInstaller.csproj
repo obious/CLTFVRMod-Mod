@@ -6,10 +6,10 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>latest</LangVersion>
-    <AssemblyName>CircuitLordVRModInstaller</AssemblyName>
+    <AssemblyName>CLTFVRModLauncher</AssemblyName>
     <!-- the UAC prompt shows the title -->
-    <AssemblyTitle>CircuitLord's VR Mod Installer</AssemblyTitle>
-    <Product>CircuitLord's VR Mod Installer</Product>
+    <AssemblyTitle>CLTFVRMod-Mod Launcher</AssemblyTitle>
+    <Product>CLTFVRMod-Mod Launcher</Product>
     <RootNamespace>BigWalkVRInstaller</RootNamespace>
     <Version>1.2.9</Version>
     <ApplicationIcon>app.ico</ApplicationIcon>
@@ -27,6 +27,15 @@
     <Resource Include="app.ico" />
     <Resource Include="Assets\big-walk.jpg" />
     <Resource Include="Assets\titanfall-2.jpg" />
+  </ItemGroup>
+
+  <!-- keyboard/mouse patch set and our own script mod (kbm/), applied by TitanfallKbm; listed one by one so
+       the Titanfall 2 VR menu files install.py copies into a dev checkout never get embedded -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\kbm\kbm.json" LogicalName="kbm/kbm.json" />
+    <EmbeddedResource Include="..\..\kbm\mods\TF2VR.Minimal\mod.json" LogicalName="kbm/mod/mod.json" />
+    <EmbeddedResource Include="..\..\kbm\mods\TF2VR.Minimal\mod\scripts\vscripts\tf2vr_minimal_*.*"
+                      LogicalName="kbm/mod/mod/scripts/vscripts/%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
