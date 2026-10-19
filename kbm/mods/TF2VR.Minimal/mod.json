@@ -1,0 +1,243 @@
+{
+  "Name": "TF2VR.Minimal",
+  "Description": "Bare glue for the Titanfall2VR plugin without the cockpit/interaction scripts",
+  "Version": "0.1.0",
+  "LoadPriority": 2,
+  "Localisation": [
+    "resource/tf2vr_english.txt"
+  ],
+  "ConVars": [
+    {
+      "Name": "tf2vr_ads_eye",
+      "DefaultValue": "-1",
+      "Flags": "ARCHIVE_PLAYERPROFILE",
+      "HelpString": "eye the sights line up with when aiming down sights: -1 left, 1 right, 0 between the eyes"
+    },
+    {
+      "Name": "tf2vr_ads_drop",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE",
+      "HelpString": "metres to lower the gun when aiming down sights (negative raises it)"
+    },
+    {
+      "Name": "tf2vr_snap_turn",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_turn_speed",
+      "DefaultValue": "210",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_snap_angle",
+      "DefaultValue": "45",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_gun_angle_offset",
+      "DefaultValue": "-15",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_toggle_grip",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_head_hud",
+      "DefaultValue": "1",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_titan_hud",
+      "DefaultValue": "1",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_hitmarkers",
+      "DefaultValue": "1",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_titan_gun_turn",
+      "DefaultValue": "1",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_cutscenes_vr",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_disable_vignette",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_volume_defaulted",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_gun_ack",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_gun_name",
+      "DefaultValue": ""
+    },
+    {
+      "Name": "tf2vr_gun_slot",
+      "DefaultValue": "-1"
+    },
+    {
+      "Name": "tf2vr_holster_mask",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_pickup_left",
+      "DefaultValue": "-1"
+    },
+    {
+      "Name": "tf2vr_pickup_right",
+      "DefaultValue": "-1"
+    },
+    {
+      "Name": "tf2vr_pickup_kind_left",
+      "DefaultValue": "-1"
+    },
+    {
+      "Name": "tf2vr_pickup_kind_right",
+      "DefaultValue": "-1"
+    },
+    {
+      "Name": "tf2vr_pickup_debug",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_grab_debug",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_grenade_ack",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_grenade_consumes_ammo",
+      "DefaultValue": "1"
+    },
+    {
+      "Name": "tf2vr_projectile_ticket",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_projectile_entity",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_chest_visible",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_utility_entity",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_reload_highlight",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_reload_highlight_entity",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_reload_ejections",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_reload_rounds",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_reload_empty_grabs",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_reload_magazine_out",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_reload_stop_sound",
+      "DefaultValue": ""
+    },
+    {
+      "Name": "tf2vr_recenters",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_recenter_hint",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_titan_transition_mask",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_titan_transition_screen",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_memory_enabled",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_memory_capture",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_memory_campaign",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_memory_story",
+      "DefaultValue": "0"
+    },
+    {
+      "Name": "tf2vr_memory_room",
+      "DefaultValue": "0"
+    }
+  ],
+  "Scripts": [
+    {
+      "Path": "tf2vr_settings.nut",
+      "RunOn": "UI",
+      "UICallback": {
+        "Before": "TF2VR_AddSettingsMenu"
+      }
+    },
+    {
+      "Path": "tf2vr_menu.nut",
+      "RunOn": "UI",
+      "UICallback": {
+        "After": "TF2VR_MenuInit"
+      }
+    },
+    {
+      "Path": "tf2vr_minimal_stubs.gnut",
+      "RunOn": "SP"
+    },
+    {
+      "Path": "tf2vr_minimal_body.nut",
+      "RunOn": "CLIENT && SP"
+    },
+    {
+      "Path": "tf2vr_minimal_embark.nut",
+      "RunOn": "CLIENT && SP"
+    },
+    {
+      "Path": "tf2vr_minimal_memories.nut",
+      "RunOn": "CLIENT && SP"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+// the plugin calls these by name; the cockpit mod used them for its interaction systems
+global function TF2VR_PredictGrenade
+global function TF2VR_UpdateArcToolPose
+global function TF2VR_UpdateEyeCase
+global function TF2VR_UpdatePickups
+global function TF2VR_UpdateTitanPose
+
+void function TF2VR_PredictGrenade( int ticket, int consumesAmmo, vector position, vector angles, vector velocity, vector spin ) {}
+void function TF2VR_UpdateArcToolPose( int command, vector origin, vector direction ) {}
+void function TF2VR_UpdateEyeCase( int hands, vector left, vector right, vector leftAngles, vector rightAngles ) {}
+void function TF2VR_UpdatePickups( int mask, vector left, vector right, vector leftForward, vector rightForward, vector leftHip, vector rightHip, vector hipForward ) {}
+void function TF2VR_UpdateTitanPose( int command, vector origin, vector direction, vector angles, vector headOrigin, vector headDirection ) {}

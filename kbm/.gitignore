@@ -1,0 +1,19 @@
+# Only CLTFVRMod-Mod's own files are tracked. The game, Northstar, Titanfall 2 VR and the files
+# kbm_patch/install.py edits or copies in from Titanfall 2 VR are not.
+/*
+!/.gitignore
+!/README.md
+!/LICENSE
+!/kbm_patch/
+
+/mods/*
+!/mods/
+!/mods/TF2VR.Minimal/
+
+# copied from Titanfall2VR.Cockpit by kbm_patch/install.py
+/mods/TF2VR.Minimal/mod/scripts/vscripts/tf2vr_menu.nut
+/mods/TF2VR.Minimal/mod/scripts/vscripts/tf2vr_settings.nut
+/mods/TF2VR.Minimal/mod/resource/ui/menus/
+/mods/TF2VR.Minimal/mod/resource/tf2vr_english.txt
+
+__pycache__/
