@@ -65,7 +65,7 @@ Every patch site is commented in the script.
 
 - Moving the mouse up and down aims but doesn't tilt the headset view.
 - There's no mouse cursor in the headset in menus. Use the keyboard or the desktop window.
-- The HUD (health, ammo and so on) isn't visible; damage flashes show as a floating rectangle.
+- The HUD and damage tint are shown on a flat panel in front of you, as in Titanfall 2 VR, not across the whole view.
 - The arm-span calibration still runs at every start. Do it in the pose you play in, for example seated.
 - Jump occasionally misses a press.
 - The grenade throw arc isn't shown.

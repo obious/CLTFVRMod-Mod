@@ -140,17 +140,26 @@ if '--vr-rig' not in sys.argv:
         # the clientShotDirectionCall patch above) wrap the group-6 draw: begin ends an active capture, saving
         # its type+1 in spare byte 0x31ec68, then begins the reticle capture; end ends it and resumes the saved
         # capture for the same eye. With no active capture (Titan) they pass straight through.
+        # End (0xc34b0) also binds the plugin's blend state [renderer+0x1b8] behind materialsystem's state cache,
+        # so the game's bound blend state is saved (0x31ec80/88/98) and put back after each end; otherwise the
+        # HUD groups drawn after the crosshair (damage overlay) draw opaque and cover the HUD.
         ('pilot reticle: capture helpers in dead code', 0x346e0,
-         bytes.fromhex('00488b4424284981c0ad525b0048897424304c897424384c8bf24c897c24404c8bf9be10000000'
-                       '493bc0752e448b057987290065488b0425580000004a8b3cc0803c37007505e8c5d00d00b84001'
-                       '00008bd8803c38007407eb64bb40010000'),
-         bytes.fromhex('80b98c0600000074238a8190060000fec0880571a52e00515241504883ec20e8aced08004883c4'
-                       '2041585a59e91fe9080051524883ec28e894ed08004883c4285a59440fb6053ea52e004585c074'
-                       '0fc60532a52e000041ffc8e9f2e80800c3')),
+         bytes.fromhex('00488b4424284981c0ad525b0048897424304c897424384c8bf24c897c24404c8bf9be10000000493bc075'
+                       '2e448b057987290065488b0425580000004a8b3cc0803c37007505e8c5d00d00b8400100008bd8803c3800'
+                       '7407eb64bb40010000488d1542091100488d0d93452e00e87e11fdff488bc8b20ae85413fdff488d0d7d45'
+                       '2e00ff155f6d0f00b902000000ff15f4710f00488bc84c8d050a091100488d15bbaf0f00e856d0fcff488d'
+                       '0df7081100ff15296a0f00b907000000cd29488b051b8f2e00498bd64805c0746200498bcfffd08b0dd386'
+                       '290065488b0425580000004c8b7c2440488b3cc8803c37007505e81ad00d00ba00030000488d0dda'),
+         bytes.fromhex('80b98c0600000074588a8190060000fec0880571a52e00515241504883ec20488b4908488b01488d1573a5'
+                       '2e004c8d0574a52e004c8d0d7da52e00ff90d8020000488b4c24308b542428e881ed0800488b4c2430e87b'
+                       '0000004883c42041585a59e9eae8080051524883ec28e85fed08004883c4285a59440fb60509a52e004585'
+                       'c0744fc605fda42e000041ffc8515241504883ec20e839000000488b4c24308b542428448b442420e8a2e8'
+                       '0800488b0deba42e004885c97411488b01ff501048c705d5a42e00000000004883c42041585a59c34883ec'
+                       '28488b4908488b01488b15baa42e004c8d05bba42e00448b0dc4a42e00ff90180100004883c428c3')),
         ('pilot reticle: group-6 begin capture goes through the helper', 0x27036,
          bytes.fromhex('e8f5bf0900'), bytes.fromhex('e8a5d60000')),
         ('pilot reticle: group-6 end capture goes through the helper', 0x27056,
-         bytes.fromhex('e855c40900'), bytes.fromhex('e8b6d60000')),
+         bytes.fromhex('e855c40900'), bytes.fromhex('e8ebd60000')),
     ]
     # Dominant-eye ADS: the game places the viewmodel for its one camera at the head centre, so with both eyes
     # rendering it the sights sit between them. The viewmodel group-view hook (0x88220) rebuilds the viewmodel's
