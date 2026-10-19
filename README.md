@@ -1,99 +1,36 @@
-<p align="center">
-  <img src="bigwalkvr_icon.png" alt="Big Walk VR" width="160">
-</p>
+# CLTFVRMod-Mod
 
-<h1 align="center">CircuitLord's VR Mod Installer</h1>
+Keyboard and mouse play for [Titanfall 2 VR](https://github.com/CircuitLord/CircuitLordVRModInstaller) by CircuitLord.
 
-### Join the [Discord](https://discord.gg/MTKwud2cCP) if you have questions or feedback!
+Titanfall 2 VR plays the campaign with motion controllers. This mod of the mod keeps its headset rendering and turns everything else back into the normal game: WASD and your own key binds, the mouse turns and aims while the headset looks around freely, the stock gun with its animations, the game's crosshair placed in the world where you aim, sights lined up with your dominant eye, and the HUD.
 
-Hey, I'm CircuitLord! This is a utility to automatically install my full-conversion VR mods, keep them up-to-date, and launch them in VR. It currently supports:
-- Big Walk VR
-- Titanfall 2 VR
+This repository is a fork of [CircuitLord's VR Mod Installer](https://github.com/CircuitLord/CircuitLordVRModInstaller), cut down to Titanfall 2 and extended with a **Keyboard and mouse** switch. It is not made or endorsed by CircuitLord, Respawn or EA.
 
-These mods and this installer are community projects, not affiliated with or endorsed by the game developers or publishers. Use at your own risk.
+## Using it
 
-**[Download the installer](https://github.com/CircuitLord/CircuitLordVRModInstaller/releases/latest/download/CircuitLordVRModInstaller.exe)**
+1. Run the launcher, let it find Titanfall 2 and install Titanfall 2 VR, as with CircuitLord's installer.
+2. Leave **Keyboard and mouse** on and press **Launch in VR**. Turn it off to play Titanfall 2 VR with motion controllers again; the launcher swaps between the two on every launch.
+3. Options under the switch:
+   - **Mouse tilts the view**: mouse up and down also tilts the headset view, like a flat screen.
+   - **Skip calibration**: no arm-span and height setup at startup. Bind a recenter key once in the game console: `bind F9 tf2vr_recenter`.
+4. In the pause menu's VR settings, **Sight Eye** and **Sight Height** line the sights up with your dominant eye when aiming down sights.
 
-
-## Titanfall 2 VR
-
-Titanfall 2 VR adds full VR support to the Titanfall 2 campaign. It also includes stereo rendering, full body IK, manual reloads, Titan controls, and more!
-
-### What the installer does
-
-1. **Finds Titanfall 2** through your Steam/EA/Xbox install.
-2. **Checks the EA app**, which Titanfall 2 needs you signed into to play. If it's missing, launch Titanfall 2 once to install it.
-3. **Installs Northstar and the mod** into a separate `TF2VR` profile in your game directory.
-
-Launching Titanfall 2 normally stays unmodded. To play in VR, start SteamVR/your VR runtime of choice and use the installer's Launch in VR button.
-
-### Campaign saves
-
-VR campaign save files are stored in `%LOCALAPPDATA%\Respawn\Titanfall2_VR`
-
-## Big Walk VR
-
-Big Walk VR adds full multiplayer-compatible SteamVR support to the game Big Walk by House House. It includes stereo rendering support, full 6dof motion controls with support for grabbing and throwing objects, and more!
-
-### Do other players need the mod?
-The **host and other players** need the mod installed to **see your VR hands**.
-
-Your non-vr friends can install the mod and still play in flatscreen!
-
-### What the installer does
-
-1. **Finds Big Walk** through your Steam install.
-2. **Sets up BepInEx**, the mod loader Big Walk VR depends on.
-3. **Installs the mod** into your game directory.
-
-Launching Big Walk normally through Steam stays non-VR while showing VR players' tracked movement. To play in VR, start SteamVR and use the installer's Launch in VR button.
-
-
-## Building from source
-
-Needs the .NET Framework 4.8 SDK.
-
-```
-dotnet build src/Installer -c Release
-```
-
-Output is a single `src/Installer/bin/Release/net48/CircuitLordVRModInstaller.exe` using only .NET Framework assemblies.
+The keyboard and mouse patch fits one Titanfall 2 VR build (v1.0.17, plugin sha256 `6b550331…`). After a Titanfall 2 VR update the launcher says the version isn't supported yet until this repository catches up; turn the switch off to keep playing with controllers.
 
 ## How it works
 
-`manifest-v3.json` lists the installer version and each mod release with its download URL and SHA-256 hash. The app compares it against what is installed and shows Install or Update. Older manifests stay frozen so older installers can still update themselves.
+Titanfall 2 VR is closed source and nothing of it is in this repository. At launch the launcher:
 
-Each mod entry can declare:
+- byte-patches `Titanfall2VR.dll` from an untouched copy (`Titanfall2VR.dll.orig`), after checking its sha256 and every patch site;
+- swaps the `Titanfall2VR.Cockpit` script mod for `TF2VR.Minimal`, our small replacement, copying the VR settings menu in from your own Titanfall 2 VR install;
+- starts the game borderless at your monitor's resolution.
 
-- `preserve`: files left alone if they already exist, so your calibration and configs survive updates.
-- `tokenize`: files where `{{GAMEDIR}}` and `{{GAMEDIR_JSON}}` are replaced with your game folder on install.
-- `channels`: optional releases users can pick in the version dropdown alongside stable. Each has an `id`, an optional `description`, and its own `version`, `url`, `sha256`, and `size`.
+The patch set lives in [`kbm/`](kbm/), with the Python tools used to find and test it; see [kbm/README.md](kbm/README.md).
 
-```json
-"channels": [
-  {
-    "id": "beta",
-    "description": "New features, may be unstable",
-    "version": "1.1.0-beta.1",
-    "url": "https://example.com/BigWalkVR-1.1.0-beta.1.zip",
-    "sha256": "...",
-    "size": 20214466
-  }
-]
-```
+## Building
 
-A channel shows only while its version is newer than stable. Removing a channel moves its users back to stable.
+`dotnet build CircuitLordVRModInstaller.sln -c Release` (Windows, .NET Framework 4.8 targeting) builds `CLTFVRModLauncher.exe`; `dotnet run --project tests/InstallerValidation -c Release` runs the checks. After changing a patch, re-export the patch set with `python kbm/kbm_patch/patch_tf2vr_kbm.py <untouched Titanfall2VR.dll> --export=kbm/kbm.json`.
 
-Every install records the files it wrote inside the game folder. Updates delete files the previous version shipped that the new one no longer does, and uninstall removes exactly what was recorded.
+## Credits and licence
 
-## License
-
-The installer source code is MIT, see [LICENSE](LICENSE). Third-party software details are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
-
-The mods are closed source and not covered by the MIT license. All rights reserved. Do not redistribute them without permission.
-
-## Supporting
-
-If you've enjoyed something I've made, and want to support my work, see my ko-fi!
-
-https://ko-fi.com/circuitlord 
+The launcher is CircuitLord's VR Mod Installer, MIT licensed, © Jordan (CircuitLord); see `LICENSE`. Titanfall 2 VR is © CircuitLord. The keyboard and mouse changes are MIT licensed; see `kbm/LICENSE`. Use at your own risk.
