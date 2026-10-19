@@ -252,7 +252,7 @@
       "RunOn": "CLIENT && SP"
     },
     {
-      "Path": "tf2vr_minimal_recenter.nut",
+      "Path": "tf2vr_minimal_commands.nut",
       "RunOn": "UI"
     }
   ],
@@ -262,6 +262,18 @@
       "Function": "TF2VR_RecenterCommand",
       "Context": "UI",
       "HelpString": "recenter the VR view (bind it to a key: bind F9 tf2vr_recenter)"
+    },
+    {
+      "Name": "tf2vr_switch_eye",
+      "Function": "TF2VR_SwitchEyeCommand",
+      "Context": "UI",
+      "HelpString": "line the sights up with the other eye when aiming down sights (tf2vr_ads_eye -1 <-> 1)"
+    },
+    {
+      "Name": "tf2vr_toggle_barf",
+      "Function": "TF2VR_ToggleBarfCommand",
+      "Context": "UI",
+      "HelpString": "turn mouse up/down tilting the VR view on or off (tf2vr_barf_mode)"
     }
   ]
 }

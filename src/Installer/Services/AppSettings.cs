@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace BigWalkVRInstaller.Services
 {
@@ -21,6 +23,15 @@ namespace BigWalkVRInstaller.Services
         // skip the arm-span/height calibration at startup (tf2vr_skip_cal), on unless turned off
         public bool? Titanfall2SkipCalibration;
         public bool Titanfall2SkipCalibrationEnabled => Titanfall2SkipCalibration ?? true;
+        // keys for TF2VR.Minimal's commands (TitanfallKbm.BindCommands), Source key names; null is the default, "" unbound
+        public Dictionary<string, string> Titanfall2Keys;
+
+        public string Titanfall2Key(string command) =>
+            Titanfall2Keys != null && Titanfall2Keys.TryGetValue(command, out var key) ? key
+                : Installers.TitanfallKbm.BindCommands.First(b => b.command == command).defaultKey;
+
+        public Dictionary<string, string> Titanfall2Binds() =>
+            Installers.TitanfallKbm.BindCommands.ToDictionary(b => b.command, b => Titanfall2Key(b.command));
 
         static string Dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BigWalkVRInstaller");
         static string FilePath => Path.Combine(Dir, "settings.json");

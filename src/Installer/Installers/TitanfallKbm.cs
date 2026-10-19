@@ -122,7 +122,9 @@ namespace BigWalkVRInstaller.Installers
 
         // launch.json ships "-windowed -w {width} -h {height}"; the patched plugin keeps the window borderless at 0,0
         // the options are ARCHIVE_PLAYERPROFILE convars of TF2VR.Minimal, set on every launch so the launcher's choice wins
-        public static IEnumerable<string> LaunchArguments(IEnumerable<string> arguments, int width, int height, bool barfMode, bool skipCalibration)
+        // binds are extra arguments from ApplyBinds
+        public static IEnumerable<string> LaunchArguments(IEnumerable<string> arguments, int width, int height, bool barfMode, bool skipCalibration,
+            IEnumerable<string> binds = null)
         {
             foreach (var arg in arguments)
             {
@@ -131,6 +133,54 @@ namespace BigWalkVRInstaller.Installers
             }
             foreach (var arg in new[] { "+tf2vr_barf_mode", barfMode ? "1" : "0", "+tf2vr_skip_cal", skipCalibration ? "1" : "0" })
                 yield return arg;
+            foreach (var arg in binds ?? Enumerable.Empty<string>())
+                yield return arg;
+        }
+
+        // TF2VR.Minimal's console commands the launcher binds, with their default keys (Source key names)
+        public static readonly (string command, string defaultKey)[] BindCommands =
+        {
+            ("tf2vr_recenter", "F9"),
+            ("tf2vr_switch_eye", "F7"),
+            ("tf2vr_toggle_barf", "F8"),
+        };
+
+        // the game's binds and convars, read at startup and written back on exit. Titanfall2VR.dll moves the game's
+        // config from Documents\Respawn\Titanfall2 to %LOCALAPPDATA%\Respawn\Titanfall2_VR
+        public static string SettingsCfg => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Respawn", "Titanfall2_VR", "local", "settings.cfg");
+
+        static readonly Regex BindLine = new Regex(@"^\s*bind\s+""([^""]*)""\s+""([^""]*)""\s*$");
+
+        // key -> command for every bind in the game's settings.cfg; empty when the game hasn't written it yet
+        public static Dictionary<string, string> GameBinds(string settingsCfg)
+        {
+            var binds = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (!File.Exists(settingsCfg)) return binds;
+            foreach (var line in File.ReadAllLines(settingsCfg))
+            {
+                var match = BindLine.Match(line);
+                if (match.Success) binds[match.Groups[1].Value] = match.Groups[2].Value;
+            }
+            return binds;
+        }
+
+        // command -> key ("" unbound). Rewrites settings.cfg so each command is bound to its key only, replacing whatever
+        // those keys did before; without a settings.cfg (the game never ran) returns +bind launch arguments instead.
+        public static IEnumerable<string> ApplyBinds(string settingsCfg, IReadOnlyDictionary<string, string> binds)
+        {
+            var bound = binds.Where(b => b.Value != "").ToArray();
+            if (!File.Exists(settingsCfg)) return bound.SelectMany(b => new[] { "+bind", b.Value, b.Key }).ToArray();
+            var text = File.ReadAllText(settingsCfg);
+            var newline = text.Contains("\r\n") ? "\r\n" : "\n";
+            var lines = text.Replace("\r\n", "\n").TrimEnd('\n').Split('\n').Where(line =>
+            {
+                var match = BindLine.Match(line);
+                return !match.Success || !binds.ContainsKey(match.Groups[2].Value)
+                    && !bound.Any(b => string.Equals(b.Value, match.Groups[1].Value, StringComparison.OrdinalIgnoreCase));
+            }).Concat(bound.Select(b => $"bind \"{b.Value}\" \"{b.Key}\""));
+            WriteIfChanged(settingsCfg, Encoding.ASCII.GetBytes(string.Join(newline, lines) + newline));
+            return new string[0];
         }
 
         public static byte[] Patch(byte[] untouched, int width, int height)

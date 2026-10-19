@@ -26,7 +26,7 @@ namespace BigWalkVRInstaller
 
         const string RepoUrl = "https://github.com/obious/CLTFVRMod-Mod";
         const string DiscordUrl = "https://discord.gg/MTKwud2cCP";
-        const string SupportUrl = "https://ko-fi.com/circuitlord";
+        const string CircuitLordUrl = "https://github.com/CircuitLord";
 
         readonly ObservableCollection<ModEntry> _mods = new ObservableCollection<ModEntry>();
         readonly ObservableCollection<LogEntry> _logs = new ObservableCollection<LogEntry>();
@@ -297,6 +297,7 @@ namespace BigWalkVRInstaller
             KbmToggle.IsEnabled = installed && !_titanfallBusy;
             BarfModeToggle.IsChecked = _settings.Titanfall2BarfMode;
             SkipCalibrationToggle.IsChecked = _settings.Titanfall2SkipCalibrationEnabled;
+            RefreshBindKeys();
             KbmOptions.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
             KbmOptions.IsEnabled = installed && !_titanfallBusy;
             KbmText.Text = !installed
@@ -323,6 +324,94 @@ namespace BigWalkVRInstaller
             _settings.Titanfall2BarfMode = BarfModeToggle.IsChecked == true;
             _settings.Titanfall2SkipCalibration = SkipCalibrationToggle.IsChecked == true;
             _settings.Save();
+        }
+
+        // key bind buttons; _bindingKey is the one waiting for a key press (Window_PreviewKeyDown)
+        Button _bindingKey;
+
+        Button[] BindKeyButtons => new[] { RecenterKeyButton, SwitchEyeKeyButton, ToggleBarfKeyButton };
+
+        void RefreshBindKeys()
+        {
+            _bindingKey = null;
+            var game = TitanfallKbm.GameBinds(TitanfallKbm.SettingsCfg);
+            var taken = new System.Collections.Generic.List<string>();
+            foreach (var button in BindKeyButtons)
+            {
+                var command = (string)button.Tag;
+                var key = _settings.Titanfall2Key(command);
+                button.Content = key == "" ? "None" : key;
+                if (key != "" && game.TryGetValue(key, out var current) && current != command) taken.Add($"{key} ({current})");
+            }
+            KbmKeysText.Text = "Bound in the game at each launch. Click a key to change it; Backspace clears it, Esc cancels."
+                + (taken.Count > 0 ? " These keys already do something in the game, which they won't anymore: " + string.Join(", ", taken) + "." : "");
+            KbmKeysText.Foreground = Brush(taken.Count > 0 ? "Amber" : "TextDim");
+        }
+
+        void BindKey_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshBindKeys();
+            _bindingKey = (Button)sender;
+            _bindingKey.Content = "Press a key";
+        }
+
+        // true when the key press was taken for a bind
+        bool CaptureBindKey(System.Windows.Input.KeyEventArgs e)
+        {
+            if (_bindingKey == null) return false;
+            var wpfKey = e.Key == System.Windows.Input.Key.System ? e.SystemKey : e.Key;
+            string key;
+            if (wpfKey == System.Windows.Input.Key.Escape) key = null;
+            else if (wpfKey == System.Windows.Input.Key.Back) key = "";
+            else if ((key = SourceKeyName(wpfKey)) == null) return e.Handled = true; // not bindable, keep waiting
+            if (key != null)
+            {
+                if (_settings.Titanfall2Keys == null) _settings.Titanfall2Keys = new System.Collections.Generic.Dictionary<string, string>();
+                _settings.Titanfall2Keys[(string)_bindingKey.Tag] = key;
+                _settings.Save();
+            }
+            RefreshBindKeys();
+            return e.Handled = true;
+        }
+
+        // the game's key names (as in settings.cfg) for keys worth binding; null otherwise
+        static string SourceKeyName(System.Windows.Input.Key key)
+        {
+            if (key >= System.Windows.Input.Key.A && key <= System.Windows.Input.Key.Z) return key.ToString().ToLowerInvariant();
+            if (key >= System.Windows.Input.Key.D0 && key <= System.Windows.Input.Key.D9) return ((int)(key - System.Windows.Input.Key.D0)).ToString();
+            if (key >= System.Windows.Input.Key.F1 && key <= System.Windows.Input.Key.F12) return key.ToString();
+            var numpad = new[] { "KP_INS", "KP_END", "KP_DOWNARROW", "KP_PGDN", "KP_LEFTARROW", "KP_5", "KP_RIGHTARROW", "KP_HOME", "KP_UPARROW", "KP_PGUP" };
+            if (key >= System.Windows.Input.Key.NumPad0 && key <= System.Windows.Input.Key.NumPad9) return numpad[key - System.Windows.Input.Key.NumPad0];
+            switch (key)
+            {
+                case System.Windows.Input.Key.Insert: return "INS";
+                case System.Windows.Input.Key.Delete: return "DEL";
+                case System.Windows.Input.Key.Home: return "HOME";
+                case System.Windows.Input.Key.End: return "END";
+                case System.Windows.Input.Key.PageUp: return "PGUP";
+                case System.Windows.Input.Key.PageDown: return "PGDN";
+                case System.Windows.Input.Key.Up: return "UPARROW";
+                case System.Windows.Input.Key.Down: return "DOWNARROW";
+                case System.Windows.Input.Key.Left: return "LEFTARROW";
+                case System.Windows.Input.Key.Right: return "RIGHTARROW";
+                case System.Windows.Input.Key.Space: return "SPACE";
+                case System.Windows.Input.Key.Tab: return "TAB";
+                case System.Windows.Input.Key.Pause: return "PAUSE";
+                case System.Windows.Input.Key.Decimal: return "KP_DEL";
+                case System.Windows.Input.Key.Divide: return "KP_SLASH";
+                case System.Windows.Input.Key.Multiply: return "KP_MULTIPLY";
+                case System.Windows.Input.Key.Subtract: return "KP_MINUS";
+                case System.Windows.Input.Key.Add: return "KP_PLUS";
+                case System.Windows.Input.Key.OemPlus: return "=";
+                case System.Windows.Input.Key.OemOpenBrackets: return "[";
+                case System.Windows.Input.Key.OemCloseBrackets: return "]";
+                case System.Windows.Input.Key.OemSemicolon: return "SEMICOLON";
+                case System.Windows.Input.Key.OemQuotes: return "'";
+                case System.Windows.Input.Key.OemComma: return ",";
+                case System.Windows.Input.Key.OemPeriod: return ".";
+                case System.Windows.Input.Key.OemQuestion: return "/";
+                default: return null;
+            }
         }
 
         void SetStep(Border badge, TextBlock label, bool done)
@@ -949,12 +1038,7 @@ namespace BigWalkVRInstaller
         });
 
         void OpenDiscord_Click(object sender, RoutedEventArgs e) => Open(() => GameLauncher.OpenUrl(DiscordUrl));
-        async void OpenSupport_Click(object sender, RoutedEventArgs e)
-        {
-            // let the confetti show before the browser takes focus
-            await Task.Delay(300);
-            Open(() => GameLauncher.OpenUrl(SupportUrl));
-        }
+        void OpenCircuitLord_Click(object sender, RoutedEventArgs e) => Open(() => GameLauncher.OpenUrl(CircuitLordUrl));
         void OpenRepo_Click(object sender, RoutedEventArgs e) => Open(() => GameLauncher.OpenUrl(RepoUrl));
         async void CreateCrashReport_Click(object sender, RoutedEventArgs e)
         {
@@ -1045,6 +1129,7 @@ namespace BigWalkVRInstaller
 
         void Window_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            if (CaptureBindKey(e)) return;
             if (e.Key != System.Windows.Input.Key.Escape) return;
             if (_confirm != null)
             {

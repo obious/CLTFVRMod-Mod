@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -153,6 +154,14 @@ namespace InstallerValidation
                 var kbmLaunch = Titanfall2Installer.CreateLaunchInfo(root, kbm: true, width: 3840, height: 2160, barfMode: true, skipCalibration: false);
                 Assert(kbmLaunch.Arguments.EndsWith(" -profile=TF2VR -windowed -noborder -w 3840 -h 2160 +sound_without_focus 1 +mat_vsync_mode 0"
                     + " +tf2vr_barf_mode 1 +tf2vr_skip_cal 0"), "wrong keyboard and mouse launch arguments: " + kbmLaunch.Arguments);
+                var binds = new Dictionary<string, string> { ["tf2vr_recenter"] = "F9", ["tf2vr_switch_eye"] = "", ["tf2vr_toggle_barf"] = "k" };
+                var settingsCfg = Path.Combine(root, "settings.cfg");
+                var bindArgs = TitanfallKbm.ApplyBinds(settingsCfg, binds).ToArray();
+                Assert(string.Join(" ", bindArgs) == "+bind F9 tf2vr_recenter +bind k tf2vr_toggle_barf", "wrong first-run bind arguments");
+                File.WriteAllText(settingsCfg, "bind \"F9\" \"jpeg\"\r\nbind \"F7\" \"tf2vr_switch_eye\"\r\nbind \"K\" \"tf2vr_recenter\"\r\nbind \"MOUSE1\" \"+attack\"\r\nsensitivity \"2\"\r\n");
+                Assert(TitanfallKbm.ApplyBinds(settingsCfg, binds).Count() == 0, "bind arguments despite settings.cfg");
+                Assert(File.ReadAllText(settingsCfg) == "bind \"MOUSE1\" \"+attack\"\r\nsensitivity \"2\"\r\nbind \"F9\" \"tf2vr_recenter\"\r\nbind \"k\" \"tf2vr_toggle_barf\"\r\n",
+                    "wrong settings.cfg binds: " + File.ReadAllText(settingsCfg));
                 Assert(launch.EnvironmentVariables["TF2VR_OPENXR"] == "1", "OpenXR was not enabled");
                 Assert(!launch.EnvironmentVariables.ContainsKey("TF2VR_DEV_SESSION"), "development session inherited");
                 Assert(!launch.EnvironmentVariables.ContainsKey("XR_RUNTIME_JSON"), "runtime override inherited");

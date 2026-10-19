@@ -192,7 +192,7 @@
                     </Grid>
                 </Button>
             </StackPanel>
-            <local:SupportFooter Grid.Row="2" Margin="0,16,0,18" Button.Click="OpenSupport_Click" />
+            <local:SupportFooter Grid.Row="2" Margin="0,16,0,18" Button.Click="OpenCircuitLord_Click" />
           </Grid>
         </ScrollViewer>
 
@@ -315,7 +315,7 @@
                                         <TextBlock Text="•" Foreground="{StaticResource TextDim}" VerticalAlignment="Center" Margin="4,0" />
                                         <Button x:Name="RestoreVanillaButton" Style="{StaticResource QuietDanger}" Content="Restore vanilla" FontSize="11.5" Padding="6,3" Click="RestoreVanilla_Click" />
                                     </StackPanel>
-                                    <local:SupportFooter Margin="0,26,0,8" Button.Click="OpenSupport_Click" />
+                                    <local:SupportFooter Margin="0,26,0,8" Button.Click="OpenCircuitLord_Click" />
                                 </StackPanel>
                             </StackPanel>
 
@@ -442,11 +442,42 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
                                                     <TextBlock Text="Skip calibration" FontSize="12.5" FontWeight="SemiBold" />
-                                                    <TextBlock Text="No arm-span and height setup at startup. Press your recenter key once seated (console: bind F9 tf2vr_recenter)."
+                                                    <TextBlock Text="No arm-span and height setup at startup. Press your recenter key once seated."
                                                                FontSize="11.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,2,0,0" />
                                                 </StackPanel>
                                                 <CheckBox x:Name="SkipCalibrationToggle" Grid.Column="1" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
                                                           AutomationProperties.Name="Skip calibration" Click="KbmOption_Click" />
+                                            </Grid>
+                                            <StackPanel Margin="0,12,0,0">
+                                                <TextBlock Text="Keys" FontSize="12.5" FontWeight="SemiBold" />
+                                                <TextBlock x:Name="KbmKeysText" FontSize="11.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                            </StackPanel>
+                                            <Grid Margin="0,8,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Recenter view" FontSize="12.5" VerticalAlignment="Center" />
+                                                <Button x:Name="RecenterKeyButton" Grid.Column="1" Style="{StaticResource Secondary}" MinWidth="96" Padding="10,4"
+                                                        Tag="tf2vr_recenter" Click="BindKey_Click" AutomationProperties.Name="Recenter view key" />
+                                            </Grid>
+                                            <Grid Margin="0,8,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Switch sight eye" FontSize="12.5" VerticalAlignment="Center" />
+                                                <Button x:Name="SwitchEyeKeyButton" Grid.Column="1" Style="{StaticResource Secondary}" MinWidth="96" Padding="10,4"
+                                                        Tag="tf2vr_switch_eye" Click="BindKey_Click" AutomationProperties.Name="Switch sight eye key" />
+                                            </Grid>
+                                            <Grid Margin="0,8,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Mouse tilts the view on/off" FontSize="12.5" VerticalAlignment="Center" />
+                                                <Button x:Name="ToggleBarfKeyButton" Grid.Column="1" Style="{StaticResource Secondary}" MinWidth="96" Padding="10,4"
+                                                        Tag="tf2vr_toggle_barf" Click="BindKey_Click" AutomationProperties.Name="Mouse tilts the view on/off key" />
                                             </Grid>
                                         </StackPanel>
                                     </Grid>
@@ -464,7 +495,7 @@
                                         <Button x:Name="TitanfallSavesButton" Style="{StaticResource Quiet}" Content="Campaign saves"
                                                 FontSize="11.5" Padding="6,3" Click="TitanfallSaves_Click" />
                                     </StackPanel>
-                                    <local:SupportFooter Margin="0,26,0,8" Button.Click="OpenSupport_Click" />
+                                    <local:SupportFooter Margin="0,26,0,8" Button.Click="OpenCircuitLord_Click" />
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
