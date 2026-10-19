@@ -53,6 +53,7 @@ Your key binds live in `%LOCALAPPDATA%\Respawn\Titanfall2_VR`, separate from the
 - turns the VR body with the mouse's yaw;
 - skips the hand/gun rig, shot-direction and manual-reload hooks;
 - shows the game's crosshair on foot, drawn with the plugin's Titan reticle at the point a trace along your aim hits;
+- shows the gun's own displays, such as red-dot and holo reticles, and draws them with the same eye shift;
 - moves the gun toward your dominant eye while aiming down sights (`tf2vr_ads_eye`, `tf2vr_ads_drop`);
 - sizes the desktop window.
 
@@ -64,7 +65,7 @@ Every patch site is commented in the script.
 
 - Moving the mouse up and down aims but doesn't tilt the headset view.
 - There's no mouse cursor in the headset in menus. Use the keyboard or the desktop window.
-- Red-dot and holographic sight reticles don't show when aiming down sights.
+- The HUD (health, ammo and so on) isn't visible; damage flashes show as a floating rectangle.
 - The arm-span calibration still runs at every start. Do it in the pose you play in, for example seated.
 - Jump occasionally misses a press.
 - The grenade throw arc isn't shown.

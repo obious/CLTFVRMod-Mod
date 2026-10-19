@@ -185,6 +185,21 @@ if '--vr-rig' not in sys.argv:
         ('ADS eye: viewmodel eye view goes through the helper', 0x8829e,
          bytes.fromhex('e8cda3ffff'), bytes.fromhex('e80db3fbff')),
     ]
+    # Optic reticles: the RUI evaluate hook drops draw-group-1 RUIs (weapon RUIs, incl. hcog/holo sight reticles)
+    # unless 0x317bb8 (Titan / VR weapon held) is set, which never happens on foot with the stock viewmodel.
+    PATCHES += [
+        ('optic reticle: keep the game\'s weapon/sight RUIs on foot (je -> nop)', 0x2919c,
+         bytes.fromhex('0f843c0c0000'), b'\x90' * 6),
+        # drawWeaponRui hook (0x2fc00) draws weapon RUIs with the game's view at client+0x22abd00, which the ADS
+        # eye shift doesn't touch; for that view first rebuild it via 0x88220 (eye pose -> ADS helper), then
+        # projection as before:  mov rax,[client] ; add rax,0x22abd00 ; cmp rcx,rax ; jne p ; push rcx ;
+        # sub rsp,0x20 ; call 0x88220 ; add rsp,0x20 ; pop rcx ; p: jmp 0x881b0
+        ('optic reticle: weapon-RUI view helper in dead code', 0x43760,
+         bytes.fromhex('04820e00488bc84c8d052a241000488d15cbbf0e00e866e0fbff488d0d17241000ff15397a0e'),
+         bytes.fromhex('488b05599f2d00480500bd2a024839c1750f514883ec20e8a44a04004883c42059e92a4a0400')),
+        ('optic reticle: weapon-RUI view goes through the helper', 0x2fd9f,
+         bytes.fromhex('e80c840500'), bytes.fromhex('e8bc390100')),
+    ]
     # server weapon-frame hook (0x3d2d0): its manual-reload manager drives ammo from VR magazine
     # gestures, and it restores weapon+0x1eac after the game's frame to cancel vanilla reloads
     PATCHES += [
