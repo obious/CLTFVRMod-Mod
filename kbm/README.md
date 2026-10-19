@@ -1,4 +1,4 @@
-# CLTFVRMod-Mod: patch set and developer tools
+# Titanfall 2 VR Keyboard and Mouse (based on CircuitLord's Titanfall 2 VR): patch set and developer tools
 
 Players use the launcher at the repository root, which applies all of this at launch. This folder holds the patch set it embeds (`kbm.json`), our `TF2VR.Minimal` script mod, and the Python tools used to find, test and export the patches.
 

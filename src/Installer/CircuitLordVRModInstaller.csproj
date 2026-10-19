@@ -8,8 +8,8 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>CLTFV_KBM</AssemblyName>
     <!-- the UAC prompt shows the title -->
-    <AssemblyTitle>CLTFVRMod-Mod Launcher</AssemblyTitle>
-    <Product>CLTFVRMod-Mod Launcher</Product>
+    <AssemblyTitle>Titanfall 2 VR Keyboard and Mouse (based on CircuitLord&apos;s Titanfall 2 VR)</AssemblyTitle>
+    <Product>Titanfall 2 VR Keyboard and Mouse (based on CircuitLord&apos;s Titanfall 2 VR)</Product>
     <RootNamespace>BigWalkVRInstaller</RootNamespace>
     <Version>1.0.1</Version>
     <ApplicationIcon>app.ico</ApplicationIcon>

@@ -1,4 +1,4 @@
-# CLTFVRMod-Mod
+# Titanfall 2 VR Keyboard and Mouse (based on CircuitLord's Titanfall 2 VR)
 
 Keyboard and mouse play for [Titanfall 2 VR](https://github.com/CircuitLord/CircuitLordVRModInstaller) by CircuitLord.
 
