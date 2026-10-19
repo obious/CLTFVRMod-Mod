@@ -428,7 +428,7 @@
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
-                                                    <TextBlock Text="Mouse tilts the view" FontSize="12.5" FontWeight="SemiBold" />
+                                                    <TextBlock Text="Mouse tilts the view (barf mode)" FontSize="12.5" FontWeight="SemiBold" />
                                                     <TextBlock Text="Mouse up and down also tilts the headset view, like a flat screen. Intense for some players."
                                                                FontSize="11.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,2,0,0" />
                                                 </StackPanel>
@@ -475,9 +475,9 @@
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="Mouse tilts the view on/off" FontSize="12.5" VerticalAlignment="Center" />
+                                                <TextBlock Text="Barf mode on/off" FontSize="12.5" VerticalAlignment="Center" />
                                                 <Button x:Name="ToggleBarfKeyButton" Grid.Column="1" Style="{StaticResource Secondary}" MinWidth="96" Padding="10,4"
-                                                        Tag="tf2vr_toggle_barf" Click="BindKey_Click" AutomationProperties.Name="Mouse tilts the view on/off key" />
+                                                        Tag="tf2vr_toggle_barf" Click="BindKey_Click" AutomationProperties.Name="Barf mode on/off key" />
                                             </Grid>
                                         </StackPanel>
                                     </Grid>
