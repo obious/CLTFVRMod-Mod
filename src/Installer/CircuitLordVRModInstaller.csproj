@@ -11,7 +11,7 @@
     <AssemblyTitle>Titanfall 2 VR Keyboard and Mouse (based on CircuitLord&apos;s Titanfall 2 VR)</AssemblyTitle>
     <Product>Titanfall 2 VR Keyboard and Mouse (based on CircuitLord&apos;s Titanfall 2 VR)</Product>
     <RootNamespace>BigWalkVRInstaller</RootNamespace>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
   </PropertyGroup>
