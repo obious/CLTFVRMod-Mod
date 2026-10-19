@@ -11,7 +11,7 @@
     <AssemblyTitle>CLTFVRMod-Mod Launcher</AssemblyTitle>
     <Product>CLTFVRMod-Mod Launcher</Product>
     <RootNamespace>BigWalkVRInstaller</RootNamespace>
-    <Version>1.2.9</Version>
+    <Version>0.1.0</Version>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
   </PropertyGroup>
