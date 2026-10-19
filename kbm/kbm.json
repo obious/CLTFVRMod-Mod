@@ -282,6 +282,12 @@
    "replacement": "eb07"
   },
   {
+   "name": "vanilla vortex shield: keep the game's aim, skip the VR override",
+   "rva": 217694,
+   "expected": "8b9ef8030000",
+   "replacement": "e99704000090"
+  },
+  {
    "name": "patch table: skip client.disableMouse",
    "rva": 109542,
    "expected": "f8781200",

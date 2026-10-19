@@ -272,6 +272,12 @@ if '--vr-rig' not in sys.argv:
         ('vanilla reload: server VR magazine logic returns at once', 0x44370, b'\x48\x89\x5c', b'\x31\xc0\xc3'),
         # client weapon-frame hook (0x3d1a0) does the same on the predicting client with weapon+0x219c
         ('vanilla reload: keep reloads the client predicts (je -> jmp)', 0x3d27d, b'\x74\x07', b'\xeb\x07'),
+        # server.vortexAngles hook (0x351a0) calls the game's function first (0x35259), then resolves the vortex
+        # sphere's owner handles (fail-fast "native entity handle index changed" on a stale one) and overwrites the
+        # angles with the VR command pose (fail-fast "Vortex command pose unavailable" without one). Return the game's
+        # result right after its call (jmp to the epilogue 0x356fa), so the vortex shield aims like the flat game.
+        ('vanilla vortex shield: keep the game\'s aim, skip the VR override', 0x3525e,
+         bytes.fromhex('8b9ef8030000'), bytes.fromhex('e997040000') + b'\x90'),
     ]
 
 for name, (r9_rva, r9_target, r8_target) in TABLE_PATCHES.items():

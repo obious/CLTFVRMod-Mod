@@ -202,15 +202,17 @@ namespace BigWalkVRInstaller.Installers
             Buffer.BlockCopy(replacement, 0, data, offset, replacement.Length);
         }
 
-        // current is untouched with a keyboard and mouse patch on it, from this launcher or an earlier one: it only
-        // differs where the patch set writes (helpers may change between versions, their sites don't move)
+        // current is untouched with a keyboard and mouse patch on it, from this launcher or an earlier one whose patch
+        // sites may differ: same size and only a few KB changed. A Titanfall 2 VR update rebuilds the plugin and changes
+        // far more, so its untouched copy is never mistaken for one of ours.
+        const int MaxPatchedBytes = 16 * 1024;
+
         static bool IsPatchedFrom(byte[] untouched, byte[] current)
         {
             if (untouched.Length != current.Length) return false;
-            var sites = PatchSet.patches.Concat(new[] { PatchSet.window })
-                .Select(p => (start: RvaToOffset(untouched, p.rva), end: RvaToOffset(untouched, p.rva) + p.expected.Length / 2)).ToArray();
+            var changed = 0;
             for (var i = 0; i < current.Length; i++)
-                if (current[i] != untouched[i] && !sites.Any(s => i >= s.start && i < s.end)) return false;
+                if (current[i] != untouched[i] && ++changed > MaxPatchedBytes) return false;
             return true;
         }
 
