@@ -6,6 +6,7 @@ Titanfall 2 VR plays the campaign with motion controllers: guns in your hands, m
 
 - keyboard movement and your own key binds
 - the mouse turns you and aims, while the headset looks around freely on top of that
+- the game's crosshair, placed in the world where you aim rather than stuck to your view
 - the stock first-person gun, its animations, firing and reloading
 - a borderless full-screen desktop window that keeps the mouse inside
 - the VR settings menu in the pause menu
@@ -50,6 +51,7 @@ Your key binds live in `%LOCALAPPDATA%\Respawn\Titanfall2_VR`, separate from the
 - stops the plugin dropping mouse messages, replacing the cursor, and overwriting movement, buttons and view angles;
 - turns the VR body with the mouse's yaw;
 - skips the hand/gun rig, shot-direction and manual-reload hooks;
+- shows the game's crosshair on foot, drawn with the plugin's Titan reticle at the point a trace along your aim hits;
 - sizes the desktop window.
 
 Every patch site is commented in the script.
@@ -63,6 +65,7 @@ Every patch site is commented in the script.
 - When aiming down sights, the sights line up between the eyes instead of with one eye.
 - The arm-span calibration still runs at every start. Do it in the pose you play in, for example seated.
 - Jump occasionally misses a press.
+- The grenade throw arc isn't shown.
 
 ## Licence
 

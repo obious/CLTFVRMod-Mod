@@ -114,6 +114,44 @@ RIG_SLOT_INSTALLS = {
 if '--vr-rig' not in sys.argv:
     for name, (rva, call) in RIG_SLOT_INSTALLS.items():
         PATCHES.append((f'vanilla viewmodel: skip {name}', rva, bytes.fromhex(call), b'\x90' * 5))
+    # RUI evaluate hook (0x28fe0): crosshair RUIs (group 6 / crosshair_*) the game wants visible are hidden while
+    # the player is a pilot (0x316ad0), since VR aims with the gun's sights. Leave them to the game on foot.
+    PATCHES.append(('vanilla crosshair: keep the game\'s crosshair on foot (jne -> nop)', 0x29bae,
+                    b'\x0f\x85\x04\xfe\xff\xff', b'\x90' * 6))
+    # On foot that crosshair lands on the head-locked HUD canvas. Use the plugin's Titan reticle instead: the
+    # crosshair group is captured into reticleCanvas and drawn as a quad where a trace along the aim hits.
+    PATCHES += [
+        # reticle trace (0x30000) runs whenever there is a local player, not only in a Titan (0x2ca4e0):
+        #   movzx eax,[isTitan] -> test rcx,rcx ; setne al   (al also feeds trace-ran 0x316b50)
+        ('pilot reticle: run the reticle trace on foot', 0x30020,
+         bytes.fromhex('0fb605b9a42900'), bytes.fromhex('4885c90f95c090')),
+        # trace origin: VR muzzle only in a Titan (valid & isTitan), else the game's eye + aim angles
+        #   lea rcx,[2ca274] ; movzx eax,[rcx-4] ; and al,[2ca4e0] ; lea rdx,[rcx+0xc] ; je 0x30098 ; nop2
+        ('pilot reticle: trace from the game aim on foot, muzzle in a Titan', 0x3005f,
+         bytes.fromhex('0fb6050aa22900488d0d07a22900488d150ca2290084c07420'),
+         bytes.fromhex('488d0d0ea229000fb641fc220570a42900488d510c74229090')),
+        # frame producer: reticle-capture flag (packet +0x304 -> renderer+0x694) no longer needs isTitan
+        ('pilot reticle: capture the crosshair group on foot (je -> nop)', 0x239af, b'\x74\x17', b'\x90' * 2),
+        # frame producer: fill the reticle state (0x1e2f0 at 0x23cc5) on foot
+        ('pilot reticle: place the reticle on foot (je -> nop)', 0x23c08,
+         bytes.fromhex('0f84fd000000'), b'\x90' * 6),
+        # On foot the crosshair group is drawn inside the HUD-canvas capture (renderer+0x68c), and beginning the
+        # reticle capture there fail-fasts ("nested UI capture"). Two helpers in the dead tail of 0x346d0 (needs
+        # the clientShotDirectionCall patch above) wrap the group-6 draw: begin ends an active capture, saving
+        # its type+1 in spare byte 0x31ec68, then begins the reticle capture; end ends it and resumes the saved
+        # capture for the same eye. With no active capture (Titan) they pass straight through.
+        ('pilot reticle: capture helpers in dead code', 0x346e0,
+         bytes.fromhex('00488b4424284981c0ad525b0048897424304c897424384c8bf24c897c24404c8bf9be10000000'
+                       '493bc0752e448b057987290065488b0425580000004a8b3cc0803c37007505e8c5d00d00b84001'
+                       '00008bd8803c38007407eb64bb40010000'),
+         bytes.fromhex('80b98c0600000074238a8190060000fec0880571a52e00515241504883ec20e8aced08004883c4'
+                       '2041585a59e91fe9080051524883ec28e894ed08004883c4285a59440fb6053ea52e004585c074'
+                       '0fc60532a52e000041ffc8e9f2e80800c3')),
+        ('pilot reticle: group-6 begin capture goes through the helper', 0x27036,
+         bytes.fromhex('e8f5bf0900'), bytes.fromhex('e8a5d60000')),
+        ('pilot reticle: group-6 end capture goes through the helper', 0x27056,
+         bytes.fromhex('e855c40900'), bytes.fromhex('e8b6d60000')),
+    ]
     # server weapon-frame hook (0x3d2d0): its manual-reload manager drives ammo from VR magazine
     # gestures, and it restores weapon+0x1eac after the game's frame to cancel vanilla reloads
     PATCHES += [
