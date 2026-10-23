@@ -14,7 +14,7 @@ This repository is a fork of [CircuitLord's VR Mod Installer](https://github.com
    - **Mouse tilts the view (barf mode)**: mouse up and down also tilts the headset view, like a flat screen.
    - **Hold the view level while aiming** (with barf mode): aiming down sights holds your head's up and down tilt and position where you last recentered, so the sights line up with where you shoot.
    - **Skip calibration**: no arm-span and height setup at startup. Press your recenter key once seated.
-   - **Keys**: recenter the view (F9), switch the sight eye (F7) and turn barf mode on or off (F8). Click a key to change it. The launcher writes these binds into the game's settings at each launch and warns when a key already does something else.
+   - **Keys**: recenter the view and re-align the body under it (F9), switch the sight eye (F7) and turn barf mode on or off (F8). Click a key to change it. The launcher writes these binds into the game's settings at each launch and warns when a key already does something else.
 4. In the pause menu's VR settings, **Sight Eye** and **Sight Height** line the sights up with your dominant eye when aiming down sights.
 5. In menus, a dot on the menu panel shows where the mouse points.
 

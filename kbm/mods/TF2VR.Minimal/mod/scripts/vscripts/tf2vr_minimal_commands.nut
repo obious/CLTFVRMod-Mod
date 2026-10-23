@@ -5,10 +5,20 @@ global function TF2VR_ToggleBarfCommand
 // console commands (mod.json ConCommands), meant for key binds; the launcher can bind them. Northstar calls these
 // with no arguments
 
-// tf2vr_recenter: the same recenter as the pause menu button
+// tf2vr_recenter: the same recenter as the pause menu button, which also opens and closes a menu; while a menu is up
+// the plugin re-aligns the body with the head, so ask its view code for that for a moment (tf2vr_realign_body,
+// read by the keyboard and mouse patch) without showing a menu
 void function TF2VR_RecenterCommand()
 {
 	TF2VR_RequestRecenter()
+	thread TF2VR_RealignBody()
+}
+
+void function TF2VR_RealignBody()
+{
+	SetConVarBool( "tf2vr_realign_body", true )
+	wait 0.3
+	SetConVarBool( "tf2vr_realign_body", false )
 }
 
 // tf2vr_switch_eye: sights line up with the other eye (between the eyes switches to left)

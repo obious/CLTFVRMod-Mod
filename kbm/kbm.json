@@ -144,10 +144,10 @@
    "replacement": "4885c90f95c090"
   },
   {
-   "name": "pilot reticle: trace from the game aim on foot, muzzle in a Titan",
+   "name": "pilot reticle: trace from the game aim, on foot and in a Titan",
    "rva": 196703,
    "expected": "0fb6050aa22900488d0d07a22900488d150ca2290084c07420",
-   "replacement": "488d0d0ea229000fb641fc220570a42900488d510c74229090"
+   "replacement": "488d0d0ea229000fb641fc220570a42900488d510ceb229090"
   },
   {
    "name": "pilot reticle: capture the crosshair group on foot (je -> nop)",
@@ -250,6 +250,30 @@
    "rva": 632350,
    "expected": "e88ddbffff",
    "replacement": "e8fd97faff"
+  },
+  {
+   "name": "body re-align: menu-or-realign flag helper in dead code",
+   "rva": 279072,
+   "expected": "b60d1a92280084c90f84eb000000660f6ecf488d0de7522d00ff15e1720e000fb60dfa91280084c90f84cb000000b22c488d0dc9522d00e85418fcff0fb60ddd91280084c90f84ae000000410f28c8488d0daa522d00ff15a4720e000fb60dbd91280084c90f848e000000b22c488d0d8c522d00e81718fcff0fb60da091280084c97475410f28c9488d0d71522d00ff156b720e000fb60d8491280084c97459b22c488d0d57522d00e8e217fcff0fb60d6b91280084c97440f30f104d60488d0d3b522d00ff1535720e00803d4e912800007425b20a488d0d23522d00e8ae17fcff803d3791280000740e488d0d0e522d00ff15b0710e0090488bceff",
+   "replacement": "0fb605653e2d0084c00f85c4000000515241504151415241534881eca80000000f114424400f114c24500f115424600f115c24700f11a424800000000f11ac2490000000488b056daa2d004885c0753c4989e24883e4f04883ec604c89542450488d4c2420488d157e000000e8cf0dfcff488d4c2420e85593ffff488b64245048890531aa2d004885c074108b405825ffffff7f0f95c00fb6c0eb0231c00f104424400f104c24500f105424600f105c24700f10a424800000000f10ac24900000004881c4a8000000415b415a415941585a59c3cce826ffffff440fb6c0c3cce81bffffff84c0c3cccc74663276725f7265616c69676e5f626f647900"
+  },
+  {
+   "name": "body re-align: anchor/recenter controller reads the helper",
+   "rva": 589857,
+   "expected": "440fb60563802800",
+   "replacement": "e8cf42fbff909090"
+  },
+  {
+   "name": "body re-align: anchor update choice reads the helper",
+   "rva": 595420,
+   "expected": "0fb605a96a2800",
+   "replacement": "e83f2cfbff9090"
+  },
+  {
+   "name": "body re-align: anchor reset reads the helper",
+   "rva": 595671,
+   "expected": "803dae69280000",
+   "replacement": "e8242cfbff9090"
   },
   {
    "name": "barf mode: body matrix call goes through the pitch helper",

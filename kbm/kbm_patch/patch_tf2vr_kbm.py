@@ -128,11 +128,12 @@ if '--vr-rig' not in sys.argv:
         #   movzx eax,[isTitan] -> test rcx,rcx ; setne al   (al also feeds trace-ran 0x316b50)
         ('pilot reticle: run the reticle trace on foot', 0x30020,
          bytes.fromhex('0fb605b9a42900'), bytes.fromhex('4885c90f95c090')),
-        # trace origin: VR muzzle only in a Titan (valid & isTitan), else the game's eye + aim angles
-        #   lea rcx,[2ca274] ; movzx eax,[rcx-4] ; and al,[2ca4e0] ; lea rdx,[rcx+0xc] ; je 0x30098 ; nop2
-        ('pilot reticle: trace from the game aim on foot, muzzle in a Titan', 0x3005f,
+        # trace origin: always the game's eye + aim angles, in a Titan too (its bullets follow the game's aim; the VR
+        # muzzle put the Titan reticle off where shots land)
+        #   lea rcx,[2ca274] ; movzx eax,[rcx-4] ; and al,[2ca4e0] ; lea rdx,[rcx+0xc] ; jmp 0x30098 ; nop2
+        ('pilot reticle: trace from the game aim, on foot and in a Titan', 0x3005f,
          bytes.fromhex('0fb6050aa22900488d0d07a22900488d150ca2290084c07420'),
-         bytes.fromhex('488d0d0ea229000fb641fc220570a42900488d510c74229090')),
+         bytes.fromhex('488d0d0ea229000fb641fc220570a42900488d510ceb229090')),
         # frame producer: reticle-capture flag (packet +0x304 -> renderer+0x694) no longer needs isTitan
         ('pilot reticle: capture the crosshair group on foot (je -> nop)', 0x239af, b'\x74\x17', b'\x90' * 2),
         # frame producer: fill the reticle state (0x1e2f0 at 0x23cc5) on foot
@@ -360,6 +361,29 @@ if '--vr-rig' not in sys.argv:
           '00330032002e0064006c006c000000476574437572736f72506f730053637265656e546f436c69656e7400')),
         ('menu dot: menu pointer update goes through the helper', 0x9a61e,
          bytes.fromhex('e88ddbffff'), bytes.fromhex('e8fd97faff')),
+        # Body re-align: with a menu up (byte 0x31808c) the per-frame view code re-aligns the body with the head; the
+        # recenter key asks for the same through tf2vr_realign_body. The three view-code reads of the flag go through a
+        # helper returning menu || tf2vr_realign_body; menu rendering keeps the plain flag (no 2D screen).
+        # ConVar* cached at 0x31ecd8. Assembled by kbm_patch/re/cave_realign.py.
+        ('body re-align: menu-or-realign flag helper in dead code', 0x44220,
+         bytes.fromhex(
+          'b60d1a92280084c90f84eb000000660f6ecf488d0de7522d00ff15e1720e000fb60dfa91280084c90f84cb000000b22c488d0dc9'
+          '522d00e85418fcff0fb60ddd91280084c90f84ae000000410f28c8488d0daa522d00ff15a4720e000fb60dbd91280084c90f848e'
+          '000000b22c488d0d8c522d00e81718fcff0fb60da091280084c97475410f28c9488d0d71522d00ff156b720e000fb60d84912800'
+          '84c97459b22c488d0d57522d00e8e217fcff0fb60d6b91280084c97440f30f104d60488d0d3b522d00ff1535720e00803d4e9128'
+          '00007425b20a488d0d23522d00e8ae17fcff803d3791280000740e488d0d0e522d00ff15b0710e0090488bceff'),
+         bytes.fromhex(
+          '0fb605653e2d0084c00f85c4000000515241504151415241534881eca80000000f114424400f114c24500f115424600f115c2470'
+          '0f11a424800000000f11ac2490000000488b056daa2d004885c0753c4989e24883e4f04883ec604c89542450488d4c2420488d15'
+          '7e000000e8cf0dfcff488d4c2420e85593ffff488b64245048890531aa2d004885c074108b405825ffffff7f0f95c00fb6c0eb02'
+          '31c00f104424400f104c24500f105424600f105c24700f10a424800000000f10ac24900000004881c4a8000000415b415a415941'
+          '585a59c3cce826ffffff440fb6c0c3cce81bffffff84c0c3cccc74663276725f7265616c69676e5f626f647900')),
+        ('body re-align: anchor/recenter controller reads the helper', 0x90021,
+         bytes.fromhex('440fb60563802800'), bytes.fromhex('e8cf42fbff909090')),
+        ('body re-align: anchor update choice reads the helper', 0x915dc,
+         bytes.fromhex('0fb605a96a2800'), bytes.fromhex('e83f2cfbff9090')),
+        ('body re-align: anchor reset reads the helper', 0x916d7,
+         bytes.fromhex('803dae69280000'), bytes.fromhex('e8242cfbff9090')),
         ('barf mode: body matrix call goes through the pitch helper', 0x91391,
          bytes.fromhex('e85af8f9ff'), bytes.fromhex('e8fa23fbff')),
         ('skip calibration: startup state machine checks tf2vr_skip_cal', 0x8281a,
