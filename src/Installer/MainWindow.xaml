@@ -442,7 +442,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
                                                     <TextBlock Text="Hold the view level while aiming" FontSize="12.5" FontWeight="SemiBold" />
-                                                    <TextBlock Text="With barf mode, aiming down sights ignores your head's up and down tilt, so the sights line up with where you shoot."
+                                                    <TextBlock Text="With barf mode, aiming down sights holds your head's up and down tilt and position where you last recentered, so the sights line up with where you shoot."
                                                                FontSize="11.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,2,0,0" />
                                                 </StackPanel>
                                                 <CheckBox x:Name="AdsHoldToggle" Grid.Column="1" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"

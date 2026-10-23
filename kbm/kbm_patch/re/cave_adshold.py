@@ -6,11 +6,19 @@
 # on foot only, q' = r(t) * q where r rotates the view's forward (-Z) onto the horizontal, t = ADS fraction * tf2vr_ads_hold *
 # min(tf2vr_barf_mode, 1), then calls 0x82670 with the copy. Used by the main eye views (call at 0x87589) and the
 # viewmodel eye views (call at 0x4371b inside the ADS eye helper).
+# Position hold (0x44160, called right after t is known, so also when looking straight up or down): the eyes'
+# centre eases to the recenter anchor's position (r8 + 0x10), keeping each eye's offset from it (centre of both
+# eyes' positions, [0x2c5560]+0x8a8 / +0x8e8): p' = p + t * (anchor - centre). The head pivots on the neck, so
+# looking up or down, slouching or leaning otherwise moves the eyes off the recentered spot and the sights drift
+# until the next recenter.
 # usage: cave_adshold.py <untouched Titanfall2VR.dll>
 import struct, sys, re, keystone, capstone, pefile
 
 START = 0x439a0                  # dead body of 0x435a0, after the barf / skip-calibration helpers (end 0x4399b)
-LIMIT = 0x44364
+LIMIT = 0x43e20                  # the menu dot helper starts here
+HEIGHT = 0x44160                 # position hold subroutine, after the menu dot helper (end 0x44157)
+HEIGHT_LIMIT = 0x44364
+VIEWS = 0x2c5560                 # pointer; XrView[2] at +0x888 (positions at +0x8a8 / +0x8e8)
 BUILD, F_STR, F_CV = 0x82670, 0x5060, 0x3d5f0
 CLIENT = 0x31d6c0                # client.dll base
 G_BARF = 0x31eca0                # ConVar* cache of tf2vr_barf_mode (barf helper)
@@ -92,6 +100,7 @@ have_hold:
     minss xmm0, dword ptr [rip + one]
     mulss xmm0, dword ptr [rsp + 0x80]
     movss dword ptr [rsp + 0x80], xmm0          ; t
+    call 0x44160
     ; q = (x, y, z, w) at copy + 0x10
     movss xmm4, dword ptr [rsp + 0x50]          ; qx
     movss xmm5, dword ptr [rsp + 0x54]          ; qy
@@ -280,6 +289,50 @@ for ph, target in targets.items():
 code = bytes(code)
 assert START + len(code) <= LIMIT
 
+height_asm = """
+    mov rax, qword ptr [rip + 0x11111121]
+    test rax, rax
+    je height_done
+    movss xmm1, dword ptr [rax + 0x8a8]
+    addss xmm1, dword ptr [rax + 0x8e8]
+    mulss xmm1, dword ptr [rip + height_half]
+    movss xmm2, dword ptr [rbp + 0x10]
+    subss xmm2, xmm1
+    mulss xmm2, dword ptr [rsp + 0x88]
+    addss xmm2, dword ptr [rsp + 0x68]
+    movss dword ptr [rsp + 0x68], xmm2
+    movss xmm1, dword ptr [rax + 0x8ac]
+    addss xmm1, dword ptr [rax + 0x8ec]
+    mulss xmm1, dword ptr [rip + height_half]
+    movss xmm2, dword ptr [rbp + 0x14]
+    subss xmm2, xmm1
+    mulss xmm2, dword ptr [rsp + 0x88]
+    addss xmm2, dword ptr [rsp + 0x6c]
+    movss dword ptr [rsp + 0x6c], xmm2
+    movss xmm1, dword ptr [rax + 0x8b0]
+    addss xmm1, dword ptr [rax + 0x8f0]
+    mulss xmm1, dword ptr [rip + height_half]
+    movss xmm2, dword ptr [rbp + 0x18]
+    subss xmm2, xmm1
+    mulss xmm2, dword ptr [rsp + 0x88]
+    addss xmm2, dword ptr [rsp + 0x70]
+    movss dword ptr [rsp + 0x70], xmm2
+height_done:
+    ret
+    int3
+    int3
+    int3
+height_half:
+    .long 0x3f000000
+"""
+henc, _ = ks.asm(height_asm.replace(";", "#"), HEIGHT)
+hcode = bytearray(henc)
+i = hcode.find(struct.pack('<I', 0x11111121))
+assert i >= 0
+hcode[i:i + 4] = struct.pack('<i', VIEWS - (HEIGHT + i + 4))
+hcode = bytes(hcode)
+assert HEIGHT + len(hcode) <= HEIGHT_LIMIT
+
 md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
 end_code = code.find(b'\xcc' * 12)
 for x in md.disasm(code[:end_code], START):
@@ -287,8 +340,15 @@ for x in md.disasm(code[:end_code], START):
     t = f'  -> {x.address + x.size + int(r.group(1), 16):#x}' if r else ''
     print(f'{x.address:x} {x.mnemonic} {x.op_str}{t}')
 print('len', hex(len(code)), 'end', hex(START + len(code)))
+for x in md.disasm(hcode[:hcode.find(b'\xcc')], HEIGHT):
+    r = re.search(r'\[rip \+ (0x[0-9a-f]+)\]', x.op_str)
+    t = f'  -> {x.address + x.size + int(r.group(1), 16):#x}' if r else ''
+    print(f'H {x.address:x} {x.mnemonic} {x.op_str}{t}')
+print('HEIGHT len', hex(len(hcode)), 'end', hex(HEIGHT + len(hcode)))
 pe = pefile.PE(sys.argv[1], fast_load=True)
 print('EXP', pe.get_data(START, len(code)).hex())
 print('NEW', code.hex())
+print('HEXP', pe.get_data(HEIGHT, len(hcode)).hex())
+print('HNEW', hcode.hex())
 for site in (0x87589, 0x4371b):
     print(f'{site:x}', pe.get_data(site, 5).hex(), '->', (b'\xe8' + struct.pack('<i', START - (site + 5))).hex())
