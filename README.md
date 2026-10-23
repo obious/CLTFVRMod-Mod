@@ -16,6 +16,7 @@ This repository is a fork of [CircuitLord's VR Mod Installer](https://github.com
    - **Skip calibration**: no arm-span and height setup at startup. Press your recenter key once seated.
    - **Keys**: recenter the view (F9), switch the sight eye (F7) and turn barf mode on or off (F8). Click a key to change it. The launcher writes these binds into the game's settings at each launch and warns when a key already does something else.
 4. In the pause menu's VR settings, **Sight Eye** and **Sight Height** line the sights up with your dominant eye when aiming down sights.
+5. In menus, a dot on the menu panel shows where the mouse points.
 
 The keyboard and mouse patch fits one Titanfall 2 VR build (v1.0.17, plugin sha256 `6b550331…`). After a Titanfall 2 VR update the launcher says the version isn't supported yet until this repository catches up; turn the switch off to keep playing with controllers.
 
