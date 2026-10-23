@@ -153,7 +153,7 @@ namespace InstallerValidation
                     + "\" -profile=TF2VR -windowed -w 1280 -h 720 +sound_without_focus 1 +mat_vsync_mode 0", "wrong monitored launch arguments");
                 var kbmLaunch = Titanfall2Installer.CreateLaunchInfo(root, kbm: true, width: 3840, height: 2160, barfMode: true, skipCalibration: false);
                 Assert(kbmLaunch.Arguments.EndsWith(" -profile=TF2VR -windowed -noborder -w 3840 -h 2160 +sound_without_focus 1 +mat_vsync_mode 0"
-                    + " +tf2vr_barf_mode 1 +tf2vr_skip_cal 0"), "wrong keyboard and mouse launch arguments: " + kbmLaunch.Arguments);
+                    + " +tf2vr_barf_mode 1 +tf2vr_skip_cal 0 +tf2vr_ads_hold 1"), "wrong keyboard and mouse launch arguments: " + kbmLaunch.Arguments);
                 var binds = new Dictionary<string, string> { ["tf2vr_recenter"] = "F9", ["tf2vr_switch_eye"] = "", ["tf2vr_toggle_barf"] = "k" };
                 var settingsCfg = Path.Combine(root, "settings.cfg");
                 var bindArgs = TitanfallKbm.ApplyBinds(settingsCfg, binds).ToArray();

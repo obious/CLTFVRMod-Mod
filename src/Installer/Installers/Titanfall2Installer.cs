@@ -289,13 +289,13 @@ namespace BigWalkVRInstaller.Installers
         }
 
         public static ProcessStartInfo CreateLaunchInfo(string gamePath, bool kbm = false, int width = 1280, int height = 720,
-            bool barfMode = false, bool skipCalibration = false, IEnumerable<string> binds = null)
+            bool barfMode = false, bool skipCalibration = false, IEnumerable<string> binds = null, bool adsHold = true)
         {
             var settings = JsonUtil.Deserialize<TitanfallLaunchSettings>(File.ReadAllText(Path.Combine(gamePath, ProfileName, "tools", "launch.json")));
             var info = VrProcess(gamePath, Path.Combine(gamePath, ProfileName, "tools", "crash_monitor.exe"));
             var arguments = settings.arguments.Concat(settings.vrArguments);
             // keyboard and mouse: a borderless window covering the monitor, which the patched plugin keeps at 0,0
-            if (kbm) arguments = TitanfallKbm.LaunchArguments(arguments, width, height, barfMode, skipCalibration, binds);
+            if (kbm) arguments = TitanfallKbm.LaunchArguments(arguments, width, height, barfMode, skipCalibration, binds, adsHold);
             // the mod replaces these dimensions before the engine initializes
             info.Arguments = "\"" + Path.Combine(gamePath, ProfileName) + "\" \"" + Path.Combine(gamePath, LauncherName) + "\" "
                 + string.Join(" ", arguments
@@ -346,9 +346,10 @@ namespace BigWalkVRInstaller.Installers
                     else TitanfallKbm.Disable(GamePath);
                     var barf = _settings.Titanfall2BarfMode;
                     var skipCalibration = _settings.Titanfall2SkipCalibrationEnabled;
+                    var adsHold = _settings.Titanfall2AdsHoldEnabled;
                     var binds = kbm ? TitanfallKbm.ApplyBinds(TitanfallKbm.SettingsCfg, _settings.Titanfall2Binds()) : null;
-                    log.WriteLine("kbm=" + kbm + (kbm ? $" size={width}x{height} barf={barf} skip_calibration={skipCalibration}" : ""));
-                    using (var monitor = Process.Start(CreateLaunchInfo(GamePath, kbm, width, height, barf, skipCalibration, binds)))
+                    log.WriteLine("kbm=" + kbm + (kbm ? $" size={width}x{height} barf={barf} ads_hold={adsHold} skip_calibration={skipCalibration}" : ""));
+                    using (var monitor = Process.Start(CreateLaunchInfo(GamePath, kbm, width, height, barf, skipCalibration, binds, adsHold)))
                         log.WriteLine("monitor_started pid=" + monitor.Id);
                 }
                 catch (Exception error)

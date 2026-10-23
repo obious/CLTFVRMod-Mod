@@ -308,6 +308,8 @@ namespace BigWalkVRInstaller
             KbmToggle.IsChecked = on;
             KbmToggle.IsEnabled = installed && !_titanfallBusy;
             BarfModeToggle.IsChecked = _settings.Titanfall2BarfMode;
+            AdsHoldToggle.IsChecked = _settings.Titanfall2AdsHoldEnabled;
+            AdsHoldToggle.IsEnabled = _settings.Titanfall2BarfMode;
             SkipCalibrationToggle.IsChecked = _settings.Titanfall2SkipCalibrationEnabled;
             RefreshBindKeys();
             KbmOptions.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
@@ -334,6 +336,8 @@ namespace BigWalkVRInstaller
         void KbmOption_Click(object sender, RoutedEventArgs e)
         {
             _settings.Titanfall2BarfMode = BarfModeToggle.IsChecked == true;
+            _settings.Titanfall2AdsHold = AdsHoldToggle.IsChecked == true;
+            AdsHoldToggle.IsEnabled = _settings.Titanfall2BarfMode;
             _settings.Titanfall2SkipCalibration = SkipCalibrationToggle.IsChecked == true;
             _settings.Save();
         }

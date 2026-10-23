@@ -124,14 +124,15 @@ namespace BigWalkVRInstaller.Installers
         // the options are ARCHIVE_PLAYERPROFILE convars of TF2VR.Minimal, set on every launch so the launcher's choice wins
         // binds are extra arguments from ApplyBinds
         public static IEnumerable<string> LaunchArguments(IEnumerable<string> arguments, int width, int height, bool barfMode, bool skipCalibration,
-            IEnumerable<string> binds = null)
+            IEnumerable<string> binds = null, bool adsHold = true)
         {
             foreach (var arg in arguments)
             {
                 yield return arg.Replace("{width}", width.ToString()).Replace("{height}", height.ToString());
                 if (arg == "-windowed") yield return "-noborder";
             }
-            foreach (var arg in new[] { "+tf2vr_barf_mode", barfMode ? "1" : "0", "+tf2vr_skip_cal", skipCalibration ? "1" : "0" })
+            foreach (var arg in new[] { "+tf2vr_barf_mode", barfMode ? "1" : "0", "+tf2vr_skip_cal", skipCalibration ? "1" : "0",
+                "+tf2vr_ads_hold", adsHold ? "1" : "0" })
                 yield return arg;
             foreach (var arg in binds ?? Enumerable.Empty<string>())
                 yield return arg;

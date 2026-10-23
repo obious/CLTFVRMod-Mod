@@ -20,6 +20,9 @@ namespace BigWalkVRInstaller.Services
         public bool Titanfall2KbmEnabled => Titanfall2Kbm ?? true;
         // mouse up/down tilts the VR view (tf2vr_barf_mode), off unless turned on
         public bool Titanfall2BarfMode;
+        // with barf mode, aiming down sights ignores the head's up/down tilt (tf2vr_ads_hold), on unless turned off
+        public bool? Titanfall2AdsHold;
+        public bool Titanfall2AdsHoldEnabled => Titanfall2AdsHold ?? true;
         // skip the arm-span/height calibration at startup (tf2vr_skip_cal), on unless turned off
         public bool? Titanfall2SkipCalibration;
         public bool Titanfall2SkipCalibrationEnabled => Titanfall2SkipCalibration ?? true;

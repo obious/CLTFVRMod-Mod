@@ -435,6 +435,19 @@
                                                 <CheckBox x:Name="BarfModeToggle" Grid.Column="1" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
                                                           AutomationProperties.Name="Mouse tilts the view" Click="KbmOption_Click" />
                                             </Grid>
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
+                                                    <TextBlock Text="Hold the view level while aiming" FontSize="12.5" FontWeight="SemiBold" />
+                                                    <TextBlock Text="With barf mode, aiming down sights ignores your head's up and down tilt, so the sights line up with where you shoot."
+                                                               FontSize="11.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                                </StackPanel>
+                                                <CheckBox x:Name="AdsHoldToggle" Grid.Column="1" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                                          AutomationProperties.Name="Hold the view level while aiming" Click="KbmOption_Click" />
+                                            </Grid>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
