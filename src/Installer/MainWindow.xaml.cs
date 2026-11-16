@@ -977,14 +977,43 @@ namespace BigWalkVRInstaller
             GameLauncher.OpenFolder(_selectedGame == SelectedGame.Titanfall2 ? _titanfall.GamePath : _bigWalk.GamePath));
 
         void TitanfallSaves_Click(object sender, RoutedEventArgs e) =>
-            ShowTitanfallSaves(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+            ShowTitanfallSaves(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), BaseGameSaveDirectory);
 
-        void ShowTitanfallSaves(string localAppData)
+        void ShowTitanfallSaves(string localAppData, string baseSaveDirectory)
         {
             TitanfallVrSaveStatus.Text = SaveStatusText(Titanfall2Installer.GetCampaignSaveStatus(Titanfall2Installer.SaveDirectory(localAppData)));
+            var baseStatus = Titanfall2Installer.GetCampaignSaveStatus(baseSaveDirectory);
+            TitanfallBaseSaveStatus.Text = SaveStatusText(baseStatus);
+            TitanfallImportSaveButton.IsEnabled = baseStatus == CampaignSaveStatus.Available;
             InstallerView.IsEnabled = false;
             TitanfallSavesOverlay.Visibility = Visibility.Visible;
             TitanfallSavesCloseButton.Focus();
+        }
+
+        static string BaseGameSaveDirectory =>
+            Titanfall2Installer.BaseGameSaveDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+
+        async void ImportTitanfallSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (Titanfall2Installer.IsRunning())
+            {
+                Status("Close Titanfall 2 before importing a save", true);
+                return;
+            }
+            if (!await Confirm("Import base game save",
+                "Replaces the VR campaign progress and checkpoint with the base game's. Your VR settings and key binds stay, and the current VR save is backed up to a backup folder next to it.",
+                "Import")) return;
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            try
+            {
+                var backup = Titanfall2Installer.ImportCampaignSave(BaseGameSaveDirectory, Titanfall2Installer.SaveDirectory(localAppData), DateTime.Now);
+                Status(backup == null ? "Imported the base game save" : $"Imported the base game save; the previous VR save is in {backup}");
+            }
+            catch (Exception ex)
+            {
+                Status("Couldn't import the save: " + ex.Message, true);
+            }
+            ShowTitanfallSaves(localAppData, BaseGameSaveDirectory);
         }
 
         void CloseTitanfallSaves_Click(object sender, RoutedEventArgs e)

@@ -227,6 +227,42 @@ namespace BigWalkVRInstaller.Installers
             return count == 0 ? CampaignSaveStatus.Missing : count == CampaignFiles.Length ? CampaignSaveStatus.Available : CampaignSaveStatus.Incomplete;
         }
 
+        // the base game's own save (Titanfall2.exe without Titanfall 2 VR)
+        public static string BaseGameSaveDirectory(string documentsPath) => Path.Combine(documentsPath, "Respawn", "Titanfall2");
+
+        static readonly System.Text.RegularExpressions.Regex CampaignLine =
+            new System.Text.RegularExpressions.Regex(@"^\s*sp_\S*\s", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        // Copies a campaign into the VR save: the checkpoint (savegames/savegame.sav) and the campaign progress in profile.cfg,
+        // its sp_* lines (unlocked missions, completion per difficulty, collectibles, Titan loadouts). The VR save's other
+        // profile settings stay. Its current files are backed up first, into profile/backup-<time>; returns that folder.
+        public static string ImportCampaignSave(string fromDirectory, string toDirectory, DateTime now)
+        {
+            if (GetCampaignSaveStatus(fromDirectory) != CampaignSaveStatus.Available)
+                throw new Exception("the base game has no complete campaign save to import.");
+            var from = Path.Combine(fromDirectory, "profile");
+            var to = Path.Combine(toDirectory, "profile");
+            var backup = Path.Combine(to, "backup-" + now.ToString("yyyyMMdd-HHmmss"));
+            foreach (var name in CampaignFiles)
+            {
+                var file = Path.Combine(to, name);
+                if (!File.Exists(file)) continue;
+                var copy = Path.Combine(backup, name);
+                Directory.CreateDirectory(Path.GetDirectoryName(copy));
+                File.Copy(file, copy, true);
+            }
+
+            var profile = Path.Combine(to, "profile.cfg");
+            var current = File.Exists(profile) ? File.ReadAllText(profile) : "";
+            var newline = current.Contains("\r\n") || current == "" ? "\r\n" : "\n";
+            var kept = current.Replace("\r\n", "\n").Split('\n').Where(line => line.Trim() != "" && !CampaignLine.IsMatch(line));
+            var campaign = File.ReadAllText(Path.Combine(from, "profile.cfg")).Replace("\r\n", "\n").Split('\n').Where(line => CampaignLine.IsMatch(line));
+            Directory.CreateDirectory(Path.Combine(to, "savegames"));
+            File.Copy(Path.Combine(from, "savegames", "savegame.sav"), Path.Combine(to, "savegames", "savegame.sav"), true);
+            File.WriteAllText(profile, string.Join(newline, kept.Concat(campaign)) + newline);
+            return Directory.Exists(backup) ? backup : null;
+        }
+
         public void Uninstall() => OwnedFileStore.Remove(GamePath, InstallerId);
 
         // the EA app installs under Program Files, where only admins can write

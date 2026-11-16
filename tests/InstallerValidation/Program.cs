@@ -515,18 +515,35 @@ namespace InstallerValidation
             var profile = Path.Combine(Titanfall2Installer.SaveDirectory(documents), "profile");
             Assert((string)((Button)window.FindName("TitanfallSavesButton")).Content == "Campaign saves", "saves modal button missing");
             Assert((string)((Button)window.FindName("TitanfallSaveDirectoryButton")).Content == "Open folder", "save folder label changed");
-            Assert(window.FindName("TitanfallCopySaveButton") == null, "base game save import remains");
-            show.Invoke(window, new object[] { documents });
+            var baseSave = Titanfall2Installer.BaseGameSaveDirectory(Path.Combine(root, "save-dialog-documents"));
+            var importButton = (Button)window.FindName("TitanfallImportSaveButton");
+            show.Invoke(window, new object[] { documents, baseSave });
             Assert(overlay.Visibility == System.Windows.Visibility.Visible, "saves modal did not open");
             Assert(!((Grid)window.FindName("InstallerView")).IsEnabled, "saves modal left launch controls enabled");
             Assert(status.Text == "No save", "missing save status incorrect");
+            Assert(((TextBlock)window.FindName("TitanfallBaseSaveStatus")).Text == "No save" && !importButton.IsEnabled, "import offered without a base game save");
             Directory.CreateDirectory(Path.Combine(profile, "savegames"));
             File.WriteAllText(Path.Combine(profile, "savegames", "savegame.sav"), "vr-checkpoint");
-            show.Invoke(window, new object[] { documents });
+            show.Invoke(window, new object[] { documents, baseSave });
             Assert(status.Text == "Incomplete save", "incomplete save status incorrect");
-            File.WriteAllText(Path.Combine(profile, "profile.cfg"), "vr-unlocks");
-            show.Invoke(window, new object[] { documents });
+            File.WriteAllText(Path.Combine(profile, "profile.cfg"), "sensitivity \"3\"\r\nsp_unlockedMission \"3\"\r\nsp_unlocks_level_1 \"2\"\r\ntf2vr_ads_eye \"-1\"\r\n");
+            show.Invoke(window, new object[] { documents, baseSave });
             Assert(status.Text == "Save found", "complete save status incorrect");
+
+            // import: the base game's checkpoint and sp_* progress lines replace the VR ones, other VR settings stay, VR files backed up
+            var baseProfile = Path.Combine(baseSave, "profile");
+            Directory.CreateDirectory(Path.Combine(baseProfile, "savegames"));
+            File.WriteAllText(Path.Combine(baseProfile, "savegames", "savegame.sav"), "base-checkpoint");
+            File.WriteAllText(Path.Combine(baseProfile, "profile.cfg"), "sensitivity \"9\"\r\nsp_unlockedMission \"9\"\r\nSP_difficulty \"3\"\r\n");
+            show.Invoke(window, new object[] { documents, baseSave });
+            Assert(importButton.IsEnabled, "import not offered with a base game save");
+            var backup = Titanfall2Installer.ImportCampaignSave(baseSave, Titanfall2Installer.SaveDirectory(documents), new DateTime(2026, 11, 15, 12, 0, 0));
+            Assert(backup == Path.Combine(profile, "backup-20261115-120000"), "wrong save backup folder: " + backup);
+            Assert(File.ReadAllText(Path.Combine(backup, "savegames", "savegame.sav")) == "vr-checkpoint"
+                && File.ReadAllText(Path.Combine(backup, "profile.cfg")).Contains("sp_unlockedMission \"3\""), "VR save not backed up");
+            Assert(File.ReadAllText(Path.Combine(profile, "savegames", "savegame.sav")) == "base-checkpoint", "checkpoint not imported");
+            Assert(File.ReadAllText(Path.Combine(profile, "profile.cfg")) == "sensitivity \"3\"\r\ntf2vr_ads_eye \"-1\"\r\nsp_unlockedMission \"9\"\r\nSP_difficulty \"3\"\r\n",
+                "wrong imported profile.cfg: " + File.ReadAllText(Path.Combine(profile, "profile.cfg")));
             ((Button)window.FindName("TitanfallSavesCloseButton")).RaiseEvent(new System.Windows.RoutedEventArgs(Button.ClickEvent));
             Assert(overlay.Visibility == System.Windows.Visibility.Collapsed, "saves modal did not close");
             Assert(((Grid)window.FindName("InstallerView")).IsEnabled, "closing saves modal left launch controls disabled");

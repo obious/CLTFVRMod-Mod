@@ -596,6 +596,18 @@
                         <TextBlock Text="VR save" FontSize="12.5" />
                         <TextBlock x:Name="TitanfallVrSaveStatus" Grid.Column="1" FontSize="12.5" Foreground="{StaticResource TextDim}" />
                     </Grid>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Base game save" FontSize="12.5" />
+                        <TextBlock x:Name="TitanfallBaseSaveStatus" Grid.Column="1" FontSize="12.5" Foreground="{StaticResource TextDim}" />
+                    </Grid>
+                    <Button x:Name="TitanfallImportSaveButton" Style="{StaticResource Ghost}" Content="Import base game save"
+                            Padding="16,7" Margin="0,16,0,0" HorizontalAlignment="Left" Click="ImportTitanfallSave_Click" />
+                    <TextBlock Text="Brings your base game campaign into VR: unlocked missions, collectibles and the last checkpoint. The current VR save is backed up first."
+                               FontSize="11.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,6,0,0" />
                     <Grid Margin="0,18,0,0">
                         <Button x:Name="TitanfallSaveDirectoryButton" Style="{StaticResource Ghost}" Content="Open folder"
                                 Padding="16,7" HorizontalAlignment="Left" Click="OpenTitanfallSaves_Click" />
