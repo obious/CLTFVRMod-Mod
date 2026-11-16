@@ -1,17 +1,25 @@
 r"""Patch Titanfall2VR.dll so keyboard/mouse drive the game while the headset still drives the camera.
 
 Usage:  python patch_tf2vr_kbm.py [path\to\Titanfall2VR.dll] [--restore] [--vr-rig] [--size=WxH]
-        python patch_tf2vr_kbm.py path\to\untouched\Titanfall2VR.dll --export=kbm.json
-        --vr-rig keeps the plugin's VR hand/weapon rig instead of the game's own viewmodel.
+        python patch_tf2vr_kbm.py [path\to\untouched\Titanfall2VR.dll ...] --export=kbm.json
+        --vr-rig keeps the plugin's VR hand/weapon rig instead of the game's own viewmodel (reference build only).
         --size sets the game window size; the default is the primary monitor's resolution.
-        --export writes the patch set the launcher applies (run it after changing any patch).
+        --export writes the patch set the launcher applies (run it after changing any patch); every build is
+        included, and each untouched DLL given is checked against its build's patches first.
 Every site is checked against its expected bytes first; nothing is written unless all match.
 The untouched DLL is kept next to it as Titanfall2VR.dll.orig.
+
+The patches below are written for the reference build. Other Titanfall 2 VR builds get a ported copy in
+builds/<version>.json, made by re/port/port_build.py from the reference and the new untouched DLL: after changing
+a patch here, re-run the port for each build, then export.
 """
-import shutil, struct, sys
+import hashlib, json, shutil, struct, sys
 from pathlib import Path
 
-# Offsets are for the Titanfall2VR.dll build with sha256 6b550331c178...23f3 (Oct 9 2026).
+# Offsets are for the Titanfall2VR.dll reference build (Titanfall 2 VR 1.0.17, Oct 9 2026).
+REFERENCE_SHA256 = '6b550331c17830999602f573c59307544bcb357838aad11ff00037cbe59523f3'
+REFERENCE_VERSION = '1.0.17'
+BUILDS_DIR = Path(__file__).resolve().parent / 'builds'
 
 
 def lea_retarget(insn_rva, new_target_rva):
@@ -434,37 +442,77 @@ def rva_to_offset(data, rva):
     raise ValueError(f'rva {rva:#x} not in any section')
 
 
-def export(dll, out):
+def builds():
+    """[{version, dllSha256, window: {rva, expected}, patches: [(desc, rva, expected, replacement)]}], reference first"""
+    ref_patches = [p for p in PATCHES if p[1] != WINDOW_RVA]
+    window = next(p for p in PATCHES if p[1] == WINDOW_RVA)
+    result = [{'version': REFERENCE_VERSION, 'dllSha256': REFERENCE_SHA256,
+               'window': {'rva': WINDOW_RVA, 'expected': window[2].hex()}, 'patches': ref_patches}]
+    for path in sorted(BUILDS_DIR.glob('*.json')):
+        b = json.loads(path.read_text(encoding='utf-8'))
+        b['patches'] = [(p['name'], p['rva'], bytes.fromhex(p['expected']), bytes.fromhex(p['replacement']))
+                        for p in b['patches']]
+        result.append(b)
+    return result
+
+
+def build_patches(build):
+    """the build's patches plus the window size site for this screen"""
+    w = build['window']
+    expected = bytes.fromhex(w['expected'])
+    return build['patches'] + [(f'window: client area 1280x720 -> {_width}x{_height}', w['rva'], expected,
+                                struct.pack('<4i', 0, 0, _width, _height))]
+
+
+def export(dlls, out):
     """Writes the patch set for the launcher (src/Installer reads it as an embedded resource).
 
-    dll must be the untouched Titanfall2VR.dll; every site is verified against it and its sha256 recorded,
-    so the launcher only ever patches that exact build. The window-size site is filled in at launch.
+    Holds every build, each with the sha256 of its untouched Titanfall2VR.dll, so the launcher only ever patches
+    those exact builds. Each untouched DLL given is verified against its build's sites. The window-size site is
+    filled in at launch.
     """
-    import hashlib, json
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import install
-    data = dll.read_bytes()
-    patches, window = [], None
-    for desc, rva, expected, replacement in PATCHES:
-        off = rva_to_offset(data, rva)
-        if data[off:off + len(expected)] != expected:
-            sys.exit(f'ABORT: {dll} is not the untouched build ("{desc}" at rva {rva:#x} differs)')
-        entry = {'name': desc, 'rva': rva, 'expected': expected.hex(), 'replacement': replacement.hex()}
-        if rva == WINDOW_RVA:
-            window = {'rva': rva, 'expected': expected.hex()}
-        else:
-            patches.append(entry)
+    all_builds = builds()
+    for dll in dlls:
+        data = dll.read_bytes()
+        sha = hashlib.sha256(data).hexdigest()
+        build = next((b for b in all_builds if b['dllSha256'] == sha), None)
+        if build is None:
+            sys.exit(f'ABORT: {dll} is not an untouched build this patch set knows (sha256 {sha})')
+        for desc, rva, expected, _ in build_patches(build):
+            off = rva_to_offset(data, rva)
+            if data[off:off + len(expected)] != expected:
+                sys.exit(f'ABORT: {dll} ({build["version"]}): "{desc}" at rva {rva:#x} differs')
+        print(f'verified {dll} ({build["version"]})')
     mod = json.loads((install.REPO / 'mods' / 'TF2VR.Minimal' / 'mod.json').read_text())
     out.write_text(json.dumps({
-        'dllSha256': hashlib.sha256(data).hexdigest(),
         'modName': mod['Name'],
         'modVersion': mod['Version'],
         'cockpitUiFiles': install.COCKPIT_UI_FILES,
         'menuEdits': [{'file': f, 'pattern': p, 'replacement': r} for f, p, r in install.MENU_EDITS],
-        'window': window,
-        'patches': patches,
+        'builds': [{
+            'version': b['version'],
+            'dllSha256': b['dllSha256'],
+            'window': b['window'],
+            'patches': [{'name': d, 'rva': r, 'expected': e.hex(), 'replacement': p.hex()} for d, r, e, p in b['patches']],
+        } for b in all_builds],
     }, indent=1) + '\n', encoding='utf-8')
-    print(f'exported {len(patches)} patches + window size to {out}')
+    print(f'exported {len(all_builds)} builds (' + ', '.join(f'{b["version"]}: {len(b["patches"])} patches'
+                                                               for b in all_builds) + f') to {out}')
+
+
+def find_build(dll, orig):
+    """the build of the DLL, or of its .orig backup when the DLL is already patched"""
+    all_builds = builds()
+    for path in (dll, orig):
+        if path.exists():
+            sha = hashlib.sha256(path.read_bytes()).hexdigest()
+            build = next((b for b in all_builds if b['dllSha256'] == sha), None)
+            if build:
+                return build
+    sys.exit(f'ABORT: {dll} is a Titanfall 2 VR build this patch set doesn\'t know (sha256 '
+             f'{hashlib.sha256(dll.read_bytes()).hexdigest()}). Port the patches with re/port/port_build.py.')
 
 
 def main():
@@ -474,16 +522,20 @@ def main():
 
     for arg in sys.argv:
         if arg.startswith('--export='):
-            return export(dll, Path(arg.split('=', 1)[1]))
+            return export([Path(a) for a in args], Path(arg.split('=', 1)[1]))
 
     if '--restore' in sys.argv:
         shutil.copy2(orig, dll)
         print(f'restored {dll} from {orig.name}')
         return
 
+    build = find_build(dll, orig)
+    if build['dllSha256'] != REFERENCE_SHA256 and '--vr-rig' in sys.argv:
+        sys.exit('ABORT: --vr-rig is only available for the reference build')
+    print(f'Titanfall 2 VR {build["version"]}')
     data = bytearray(dll.read_bytes())
     todo, already = [], 0
-    for desc, rva, expected, replacement in PATCHES:
+    for desc, rva, expected, replacement in build_patches(build):
         off = rva_to_offset(data, rva)
         cur = bytes(data[off:off + len(expected)])
         if cur == replacement:
@@ -499,7 +551,8 @@ def main():
     if already:
         sys.exit('ABORT: DLL is partially patched; restore it first with --restore')
 
-    if not orig.exists():
+    # a backup of an older Titanfall 2 VR build is replaced by this untouched one
+    if not orig.exists() or hashlib.sha256(orig.read_bytes()).hexdigest() != build['dllSha256']:
         shutil.copy2(dll, orig)
         print(f'backup: {orig}')
     for desc, off, replacement in todo:

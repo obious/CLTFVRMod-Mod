@@ -98,6 +98,31 @@
       "Flags": "ARCHIVE_PLAYERPROFILE"
     },
     {
+      "Name": "tf2vr_titan_hmd_steering",
+      "DefaultValue": "1",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_resolution",
+      "DefaultValue": "100",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_smaa",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_deflicker",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
+      "Name": "tf2vr_satchel_hint_seen",
+      "DefaultValue": "0",
+      "Flags": "ARCHIVE_PLAYERPROFILE"
+    },
+    {
       "Name": "tf2vr_volume_defaulted",
       "DefaultValue": "0",
       "Flags": "ARCHIVE_PLAYERPROFILE"

@@ -18,7 +18,7 @@ This repository is a fork of [CircuitLord's VR Mod Installer](https://github.com
 4. In the pause menu's VR settings, **Sight Eye** and **Sight Height** line the sights up with your dominant eye when aiming down sights.
 5. In menus, a dot on the menu panel shows where the mouse points.
 
-The keyboard and mouse patch fits one Titanfall 2 VR build (v1.0.17, plugin sha256 `6b550331…`). After a Titanfall 2 VR update the launcher says the version isn't supported yet until this repository catches up; turn the switch off to keep playing with controllers.
+The keyboard and mouse patch fits these Titanfall 2 VR builds: v1.0.17 (plugin sha256 `6b550331…`) and v1.0.25 (`9a555fe9…`). After a Titanfall 2 VR update the launcher says the version isn't supported yet until this repository catches up; turn the switch off to keep playing with controllers.
 
 ## How it works
 
@@ -32,7 +32,7 @@ The patch set lives in [`kbm/`](kbm/), with the Python tools used to find and te
 
 ## Building
 
-`dotnet build CircuitLordVRModInstaller.sln -c Release` (Windows, .NET Framework 4.8 targeting) builds `CLTFV_KBM.exe`; `dotnet run --project tests/InstallerValidation -c Release` runs the checks. After changing a patch, re-export the patch set with `python kbm/kbm_patch/patch_tf2vr_kbm.py <untouched Titanfall2VR.dll> --export=kbm/kbm.json`.
+`dotnet build CircuitLordVRModInstaller.sln -c Release` (Windows, .NET Framework 4.8 targeting) builds `CLTFV_KBM.exe`; `dotnet run --project tests/InstallerValidation -c Release` runs the checks. After changing a patch, re-port it to each supported Titanfall 2 VR build and re-export the patch set (see `kbm/README.md`).
 
 ## Credits and licence
 

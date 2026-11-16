@@ -13,11 +13,18 @@ namespace BigWalkVRInstaller.Installers
     // kbm/kbm.json, written by kbm/kbm_patch/patch_tf2vr_kbm.py --export
     public sealed class KbmPatchSet
     {
-        public string dllSha256;
         public string modName;
         public string modVersion;
         public string[] cockpitUiFiles;
         public KbmMenuEdit[] menuEdits;
+        public KbmBuild[] builds;
+    }
+
+    // one Titanfall2VR.dll build (a Titanfall 2 VR version), identified by the sha256 of its untouched file
+    public sealed class KbmBuild
+    {
+        public string version;
+        public string dllSha256;
         public KbmPatch window;
         public KbmPatch[] patches;
     }
@@ -40,8 +47,8 @@ namespace BigWalkVRInstaller.Installers
     public enum KbmSupport { Supported, NotInstalled, UnsupportedBuild }
 
     // Keyboard/mouse play (CLTFVRMod-Mod): per launch, either patches Titanfall2VR.dll and swaps the Cockpit script
-    // mod for TF2VR.Minimal, or puts the untouched plugin and Cockpit back. The patch set only fits one plugin build,
-    // identified by its sha256; the untouched copy is kept beside it as Titanfall2VR.dll.orig.
+    // mod for TF2VR.Minimal, or puts the untouched plugin and Cockpit back. The patch set has a copy per plugin build
+    // it knows, identified by its sha256; the untouched copy is kept beside it as Titanfall2VR.dll.orig.
     public static class TitanfallKbm
     {
         const string Resources = "kbm/";
@@ -54,47 +61,59 @@ namespace BigWalkVRInstaller.Installers
         static string Dll(string gamePath) => Path.Combine(Profile(gamePath), "plugins", "Titanfall2VR.dll");
         static string Orig(string gamePath) => Dll(gamePath) + ".orig";
 
-        public static KbmSupport Check(string gamePath) => FindUntouched(gamePath, out _) ?? KbmSupport.Supported;
+        static KbmBuild BuildOf(byte[] untouched)
+        {
+            var sha = Sha256(untouched);
+            return PatchSet.builds.FirstOrDefault(b => b.dllSha256 == sha);
+        }
 
-        // null when an untouched build is found (returned in untouched), otherwise why not
-        static KbmSupport? FindUntouched(string gamePath, out byte[] untouched)
+        public static KbmSupport Check(string gamePath) => FindUntouched(gamePath, out _, out _) ?? KbmSupport.Supported;
+
+        // Titanfall 2 VR versions the patch supports, for messages
+        public static string SupportedVersions => string.Join(", ", PatchSet.builds.Select(b => b.version));
+
+        // null when an untouched known build is found (returned in untouched and build), otherwise why not
+        static KbmSupport? FindUntouched(string gamePath, out byte[] untouched, out KbmBuild build)
         {
             untouched = null;
+            build = null;
             var dll = Dll(gamePath);
             if (!File.Exists(dll)) return KbmSupport.NotInstalled;
             var current = File.ReadAllBytes(dll);
-            if (Sha256(current) == PatchSet.dllSha256)
+            if ((build = BuildOf(current)) != null)
             {
                 untouched = current;
                 return null;
             }
-            // our patched copy of the supported build; anything else is a Titanfall 2 VR update the patch doesn't know yet
+            // our patched copy of a known build; anything else is a Titanfall 2 VR update the patch doesn't know yet
             var orig = Orig(gamePath);
             if (File.Exists(orig))
             {
                 var saved = File.ReadAllBytes(orig);
-                if (Sha256(saved) == PatchSet.dllSha256 && IsPatchedFrom(saved, current))
+                if ((build = BuildOf(saved)) != null && IsPatchedFrom(saved, current))
                 {
                     untouched = saved;
                     return null;
                 }
             }
+            build = null;
             return KbmSupport.UnsupportedBuild;
         }
 
         public static void Enable(string gamePath, int width, int height)
         {
-            if (FindUntouched(gamePath, out var untouched) is KbmSupport problem)
+            if (FindUntouched(gamePath, out var untouched, out var build) is KbmSupport problem)
                 throw new Exception(problem == KbmSupport.NotInstalled
                     ? "Titanfall 2 VR isn't installed."
-                    : "the keyboard and mouse patch doesn't support this Titanfall 2 VR version yet. Turn off keyboard and mouse to play.");
+                    : $"the keyboard and mouse patch doesn't support this Titanfall 2 VR version yet (supported: {SupportedVersions}). Turn off keyboard and mouse to play.");
             var cockpit = Path.Combine(Profile(gamePath), "mods", CockpitMod, "mod");
             var missing = PatchSet.cockpitUiFiles.Where(f => !File.Exists(Path.Combine(cockpit, f))).ToArray();
             if (missing.Length > 0) throw new Exception("Titanfall 2 VR is missing files keyboard and mouse needs: " + string.Join(", ", missing));
 
+            // a backup of an older Titanfall 2 VR version is replaced by this one's untouched plugin
             var orig = Orig(gamePath);
-            if (!File.Exists(orig) || Sha256(File.ReadAllBytes(orig)) != PatchSet.dllSha256) File.WriteAllBytes(orig, untouched);
-            WriteIfChanged(Dll(gamePath), Patch(untouched, width, height));
+            if (!File.Exists(orig) || Sha256(File.ReadAllBytes(orig)) != build.dllSha256) File.WriteAllBytes(orig, untouched);
+            WriteIfChanged(Dll(gamePath), Patch(untouched, build, width, height));
 
             var minimal = Path.Combine(Profile(gamePath), "mods", PatchSet.modName);
             DeployMod(minimal);
@@ -115,7 +134,7 @@ namespace BigWalkVRInstaller.Installers
             if (File.Exists(dll) && File.Exists(orig))
             {
                 var saved = File.ReadAllBytes(orig);
-                if (Sha256(saved) == PatchSet.dllSha256 && IsPatchedFrom(saved, File.ReadAllBytes(dll))) File.WriteAllBytes(dll, saved);
+                if (BuildOf(saved) != null && IsPatchedFrom(saved, File.ReadAllBytes(dll))) File.WriteAllBytes(dll, saved);
             }
             if (File.Exists(Path.Combine(Profile(gamePath), "enabledmods.json"))) SetEnabledMods(gamePath, false);
         }
@@ -184,13 +203,13 @@ namespace BigWalkVRInstaller.Installers
             return new string[0];
         }
 
-        public static byte[] Patch(byte[] untouched, int width, int height)
+        public static byte[] Patch(byte[] untouched, KbmBuild build, int width, int height)
         {
             var data = (byte[])untouched.Clone();
-            foreach (var patch in PatchSet.patches) Write(data, patch, Hex(patch.replacement));
+            foreach (var patch in build.patches) Write(data, patch, Hex(patch.replacement));
             var size = new byte[16];
             Buffer.BlockCopy(new[] { 0, 0, width, height }, 0, size, 0, 16);
-            Write(data, PatchSet.window, size);
+            Write(data, build.window, size);
             return data;
         }
 

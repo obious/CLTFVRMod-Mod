@@ -18,7 +18,7 @@ Titanfall 2 VR is closed source and not included here. This repository holds onl
 
 ## Requirements
 
-- Titanfall 2 with Titanfall 2 VR installed. The patch offsets fit the Titanfall2VR.dll build of Oct 9 2026 (sha256 `6b550331c178…`).
+- Titanfall 2 with Titanfall 2 VR 1.0.17 or 1.0.25 installed. The patches fit those exact Titanfall2VR.dll builds (sha256 `6b550331c178…` and `9a555fe9f6fc…`).
 - Python 3 on Windows.
 
 ## Install without the launcher (development)
@@ -36,7 +36,7 @@ Before patching, the patcher checks every site against the bytes it expects. If 
 
 To undo everything, run `python kbm_patch\install.py --undo`. This leaves `TF2VR.Minimal` in place, disabled.
 
-For development, add `--link`. The profile then gets a junction to this repository's `TF2VR.Minimal` instead of a copy, so script edits show up in the game without reinstalling. After changing a patch, export the set the launcher embeds with `python kbm_patch\patch_tf2vr_kbm.py <untouched Titanfall2VR.dll> --export=kbm.json`.
+For development, add `--link`. The profile then gets a junction to this repository's `TF2VR.Minimal` instead of a copy, so script edits show up in the game without reinstalling. After changing a patch, port it to the other builds and export the set the launcher embeds (see "Supporting a new Titanfall 2 VR version").
 
 Optional patcher settings, passed through by the installer:
 
@@ -61,7 +61,21 @@ Your key binds live in `%LOCALAPPDATA%\Respawn\Titanfall2_VR`, separate from the
 
 Every patch site is commented in the script.
 
-`kbm_patch/re/` holds the pefile + capstone helpers used to find those sites. You need them again whenever Titanfall 2 VR is updated.
+`kbm_patch/re/` holds the pefile + capstone helpers used to find those sites.
+
+### Supporting a new Titanfall 2 VR version
+
+The patches in `patch_tf2vr_kbm.py` are written for the reference build (1.0.17). Each later build gets a ported copy in `kbm_patch/builds/<version>.json`. It's made from the untouched reference DLL and the untouched new one:
+
+    python kbm_patch\re\port\port_build.py <reference Titanfall2VR.dll> <new Titanfall2VR.dll> --version=<version>
+
+The port matches functions between the two builds, then moves every patch site and every address inside the patches. Each site is checked against the new build. Some things need help by hand, using the helpers in `re/`: sites the port can't place, struct fields that moved, and code the compiler restructured. These go into that build's `BUILD_FIXUPS` entry in `port_build.py`. Nothing is written while any check fails.
+
+Then export the patch set the launcher embeds. It holds every build, and each untouched DLL you pass is verified against its build:
+
+    python kbm_patch\patch_tf2vr_kbm.py <untouched DLLs...> --export=kbm.json
+
+After changing a patch in `patch_tf2vr_kbm.py`, rerun the port for each build, then export.
 
 ## Known issues and plans
 

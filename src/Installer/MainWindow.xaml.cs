@@ -317,7 +317,7 @@ namespace BigWalkVRInstaller
             KbmText.Text = !installed
                 ? "Mouse aims, WASD moves and the headset looks around. Install Titanfall 2 VR first."
                 : support == KbmSupport.UnsupportedBuild
-                    ? "This Titanfall 2 VR version isn't supported by the keyboard and mouse patch yet. Turn it off to play with motion controllers."
+                    ? $"This Titanfall 2 VR version isn't supported by the keyboard and mouse patch yet (supported: {TitanfallKbm.SupportedVersions}). Turn it off to play with motion controllers."
                     : on
                         ? "On: mouse aims, WASD moves, the headset looks around. Turn off for motion controllers."
                         : "Off: plays Titanfall 2 VR with motion controllers.";
